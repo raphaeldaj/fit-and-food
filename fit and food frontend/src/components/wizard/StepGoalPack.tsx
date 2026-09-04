@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import type { Pack } from "@/types";
 
 const FORMULE_LABELS: Record<string, string> = {
@@ -22,6 +23,7 @@ interface Props {
 export default function StepGoalPack({
   goal, setGoal, mixedGoal, setMixedGoal, selectedPack, setSelectedPack, onNext,
 }: Props) {
+  const router = useRouter();
   const [packs, setPacks] = useState<Pack[]>([]);
 
   useEffect(() => {
@@ -29,6 +31,15 @@ export default function StepGoalPack({
   }, []);
 
   const packsForGoal = packs.filter((p) => p.goal === goal);
+
+  const handleSelectPack = async (pack: Pack) => {
+    const res = await fetch("/api/auth/me");
+    if (!res.ok) {
+      router.push("/connexion");
+      return;
+    }
+    setSelectedPack(pack);
+  };
 
   return (
     <div className="bg-white rounded-xl p-6 shadow-sm mb-6">
@@ -62,31 +73,28 @@ export default function StepGoalPack({
           <button
             key={pack.id}
             type="button"
-            onClick={() => setSelectedPack(pack)}
+            onClick={() => handleSelectPack(pack)}
             className={`border-2 rounded-lg p-4 text-center transition hover:-translate-y-0.5 ${selectedPack?.id === pack.id ? "border-primary bg-primary/5" : "border-border"}`}
           >
             <h4 className="text-secondary font-heading mb-1">{FORMULE_LABELS[pack.formule]}</h4>
             <p className="text-xs text-text-muted mb-2">
               {pack.mealsQty} repas{pack.snackQty > 0 ? ` + ${pack.snackQty} collations` : ""}
             </p>
-            {/* <p className="text-primary text-xl font-bold">{pack.price.toLocaleString("fr-FR")} F</p> */}
             <p className="text-primary text-xl font-bold">
-                {pack.promoActive && pack.promoPercent > 0 ? (
-                    <>
-                    <span className="line-through text-text-muted text-sm mr-2">
-                        {pack.price.toLocaleString("fr-FR")} F
-                    </span>
-                    {pack.effectivePrice.toLocaleString("fr-FR")} F
-                    </>
-                ) : (
-                    `${pack.price.toLocaleString("fr-FR")} F`
-                )}
-                </p>
-                {pack.promoActive && pack.promoPercent > 0 && (
-                <span className="inline-block bg-danger text-white text-[0.65rem] font-bold px-2 py-0.5 rounded-full mt-1">
-                    -{pack.promoPercent}%
-                </span>
-                )}
+              {pack.promoActive && pack.promoPercent > 0 ? (
+                <>
+                  <span className="line-through text-text-muted text-sm mr-2">{pack.price.toLocaleString("fr-FR")} F</span>
+                  {pack.effectivePrice.toLocaleString("fr-FR")} F
+                </>
+              ) : (
+                `${pack.price.toLocaleString("fr-FR")} F`
+              )}
+            </p>
+            {pack.promoActive && pack.promoPercent > 0 && (
+              <span className="inline-block bg-danger text-white text-[0.65rem] font-bold px-2 py-0.5 rounded-full mt-1">
+                -{pack.promoPercent}%
+              </span>
+            )}
           </button>
         ))}
       </div>

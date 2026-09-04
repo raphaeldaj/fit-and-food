@@ -1,9 +1,9 @@
-import LoginForm from "@/components/auth/LoginForm";
+import AuthCard from "@/components/auth/AuthCard";
 
 export default function ConnexionPage() {
   return (
-    <div className="min-h-[70vh] flex items-center justify-center px-4 py-12">
-      <LoginForm />
+    <div className="bg-secondary">
+      <AuthCard initialMode="login" />
     </div>
   );
 }
