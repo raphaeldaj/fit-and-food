@@ -1,0 +1,48 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Poppins:wght@300;400;500;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #FF6A13;
+  --color-primary-hover: #e05807;
+  --color-secondary: #111B3A;
+  --color-secondary-light: #1c2b59;
+  --color-bg-light: #f8f9fa;
+  --color-text-dark: #2d3748;
+  --color-text-muted: #718096;
+  --color-border: #e2e8f0;
+  --color-success: #38a169;
+  --color-danger: #e53e3e;
+  --color-warning: #dd6b20;
+
+  --font-heading: "Montserrat", sans-serif;
+  --font-body: "Poppins", sans-serif;
+}
+
+/* body {
+  @apply bg-bg-light text-text-dark font-body;
+  line-height: 1.6;
+}
+
+h1, h2, h3, h4 {
+  @apply font-heading;
+} */
+
+
+body {
+  background-color: var(--color-bg-light);
+  color: var(--color-text-dark);
+  font-family: var(--font-body);
+  line-height: 1.6;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-heading);
+}
+
+.scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

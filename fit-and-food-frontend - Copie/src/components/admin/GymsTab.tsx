@@ -1,0 +1,83 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import AddGymForm from "./AddGymForm";
+
+interface AdminGym { id: string; name: string; address: string; active: boolean; _count: { users: number }; }
+
+export default function GymsTab() {
+  const [gyms, setGyms] = useState<AdminGym[]>([]);
+  const [showForm, setShowForm] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = () => {
+    fetch("/api/admin/gyms").then((res) => res.json()).then((data) => setGyms(data.gyms ?? []));
+  };
+
+  useEffect(load, []);
+
+  const toggle = async (id: string) => {
+    await fetch(`/api/admin/gyms/${id}/toggle`, { method: "POST" });
+    load();
+  };
+
+  const remove = async (id: string, name: string) => {
+    if (!confirm(`Supprimer définitivement "${name}" ?`)) return;
+    setError(null);
+    const res = await fetch(`/api/admin/gyms/${id}`, { method: "DELETE" });
+    const json = await res.json();
+    if (!res.ok) {
+      setError(json.error ?? "Erreur lors de la suppression.");
+      return;
+    }
+    load();
+  };
+
+  return (
+    <div>
+      <div className="flex justify-between items-center flex-wrap gap-2 mb-3">
+        <h4 className="font-heading text-secondary text-sm">Salles de Sport Partenaires</h4>
+        <button onClick={() => setShowForm((v) => !v)} className="bg-primary text-white text-xs font-semibold px-3.5 py-2 rounded-md shrink-0">
+          {showForm ? "Fermer" : "+ Ajouter une Salle"}
+        </button>
+      </div>
+
+      {error && <p className="bg-danger/10 text-danger text-sm rounded-md p-2 mb-3">{error}</p>}
+
+      {showForm && (
+        <AddGymForm onCreated={() => { setShowForm(false); load(); }} onCancel={() => setShowForm(false)} />
+      )}
+
+      <div className="overflow-x-auto scrollbar-hide touch-pan-x">
+        <table className="w-full text-sm whitespace-nowrap">
+          <thead>
+            <tr className="text-left text-text-muted text-xs">
+              <th className="pb-2 pr-4">Nom</th><th className="pb-2 pr-4">Adresse</th><th className="pb-2 pr-4">Clients rattachés</th>
+              <th className="pb-2 pr-4">Statut</th><th className="pb-2 pr-4">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {gyms.map((g) => (
+              <tr key={g.id} className="border-t border-border">
+                <td className="py-2 pr-4">{g.name}</td>
+                <td className="py-2 pr-4">{g.address}</td>
+                <td className="py-2 pr-4">{g._count.users}</td>
+                <td className="py-2 pr-4">{g.active ? "Active" : "Inactive"}</td>
+                <td className="py-2 pr-4">
+                  <div className="flex gap-2">
+                    <button onClick={() => toggle(g.id)} className="text-xs font-semibold px-3 py-1.5 rounded-md bg-secondary text-white">
+                      Basculer
+                    </button>
+                    <button onClick={() => remove(g.id, g.name)} className="text-xs font-semibold px-3 py-1.5 rounded-md border border-danger text-danger">
+                      Supprimer
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}

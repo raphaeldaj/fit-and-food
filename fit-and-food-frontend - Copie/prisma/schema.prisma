@@ -1,0 +1,200 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CLIENT
+  ADMIN
+}
+enum Goal { 
+  PRISE_DE_MASSE
+  PERTE_DE_POIDS 
+}
+enum Formule {
+  DECOUVERTE
+  ESSENTIEL
+  PERFORMANCE
+}
+enum SubscriptionStatus {
+  ACTIVE
+  SUSPENDED
+  CANCELLED
+}
+enum OrderStatus {
+  PENDING
+  PAID
+  FAILED
+}
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+enum PaymentMethod {
+  WAVE
+  ORANGE_MONEY
+}
+enum DeliverySlot {
+  LUNDI
+  JEUDI
+}
+enum Availability {
+  IN_STOCK
+  OUT_OF_STOCK
+}
+
+model User {
+  id                String    @id @default(cuid())
+  fullName          String
+  email             String    @unique
+  phone             String    @unique
+  passwordHash      String
+  gymId             String?
+  gym               Gym?      @relation("UserGym", fields: [gymId], references: [id])
+  role              Role      @default(CLIENT)
+
+  twoFactorEnabled  Boolean   @default(false)
+  twoFactorSecret   String?
+
+  failedLoginCount  Int       @default(0)
+  lockedUntil       DateTime?
+
+  subscriptions     Subscription[]
+  reviews           Review[]
+
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+model Gym {
+  id            String         @id @default(cuid())
+  name          String
+  address       String
+  active        Boolean        @default(true)
+  users         User[]         @relation("UserGym")
+  subscriptions Subscription[] @relation("SubscriptionGym")
+}
+
+model Category {
+  id    String     @id @default(cuid())
+  name  String     @unique
+  meals MealItem[]
+}
+
+model MealItem {
+  id                String             @id @default(cuid())
+  name              String
+  photoUrl          String?
+  calories          Int
+  proteins          Int
+  type              String             // "Repas" | "Collation"
+  goal              Goal?
+  allergenTags      String[]
+  availability      Availability       @default(IN_STOCK)
+  categories        Category[]
+  subscriptionItems SubscriptionItem[]
+  reviews           Review[]
+}
+
+model Pack {
+  id            String         @id @default(cuid())
+  goal          Goal
+  formule       Formule
+  mealsQty      Int
+  snackQty      Int
+  price         Int
+  promoActive   Boolean        @default(false)
+  promoPercent  Int            @default(0)
+  subscriptions Subscription[]
+
+  @@unique([goal, formule])
+}
+
+
+model Subscription {
+  id            String             @id @default(cuid())
+  userId        String
+  user          User               @relation(fields: [userId], references: [id])
+  packId        String
+  pack          Pack               @relation(fields: [packId], references: [id])
+  mixedGoal     Boolean            @default(false)
+  slot          DeliverySlot
+  paymentMethod PaymentMethod
+  status        SubscriptionStatus @default(ACTIVE)
+  address       String
+  phone         String
+  gymId         String?
+  gym           Gym?               @relation("SubscriptionGym", fields: [gymId], references: [id])
+  nextDueDate   DateTime
+  failedCycles  Int                @default(0)
+
+  items         SubscriptionItem[]
+  orders        Order[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model SubscriptionItem {
+  id             String       @id @default(cuid())
+  subscriptionId String
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id])
+  mealId         String
+  meal           MealItem     @relation(fields: [mealId], references: [id])
+  quantity       Int
+}
+
+model Order {
+  id             String       @id @default(cuid())
+  subscriptionId String
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id])
+  amount         Int
+  status         OrderStatus  @default(PENDING)
+  cycleDate      DateTime     @default(now())
+
+  payment        Payment?
+  delivery       Delivery?
+}
+
+model Payment {
+  id        String        @id @default(cuid())
+  orderId   String        @unique
+  order     Order         @relation(fields: [orderId], references: [id])
+  method    PaymentMethod
+  status    PaymentStatus @default(PENDING)
+  reference String?
+  createdAt DateTime      @default(now())
+}
+
+model Delivery {
+  id      String       @id @default(cuid())
+  orderId String       @unique
+  order   Order        @relation(fields: [orderId], references: [id])
+  slot    DeliverySlot
+  date    DateTime
+  status  String       @default("scheduled")
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  mealId    String
+  meal      MealItem @relation(fields: [mealId], references: [id])
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+}
+
+model AdminLog {
+  id        String   @id @default(cuid())
+  adminName String
+  action    String
+  createdAt DateTime @default(now())
+}
