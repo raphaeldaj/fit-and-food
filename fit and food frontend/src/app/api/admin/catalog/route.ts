@@ -1,12 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { requireAdmin } from "@/lib/auth/requireAdmin";
 
 export async function GET() {
+  const { error } = await requireAdmin();
+  if (error) return error;
+
   const meals = await db.mealItem.findMany({ include: { categories: true } });
   return NextResponse.json({ meals: meals.map((m) => ({ ...m, categories: m.categories.map((c) => c.name) })) });
 }
 
 export async function POST(req: NextRequest) {
+  const { error } = await requireAdmin();
+  if (error) return error;
+
   const body = await req.json();
   const { name, type, calories, proteins, goal, categories, allergenTags, photoUrl } = body;
 

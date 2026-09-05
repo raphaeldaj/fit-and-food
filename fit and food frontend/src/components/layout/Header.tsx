@@ -1,8 +1,6 @@
-"use client";
-
-import { useState } from "react";
 import Link from "next/link";
-import { IconMenu, IconClose } from "@/components/icons";
+import { getCurrentUser } from "@/lib/auth/session";
+import HeaderNav from "./HeaderNav";
 
 function LogoIcon({ className }: { className?: string }) {
   return (
@@ -18,42 +16,19 @@ function LogoIcon({ className }: { className?: string }) {
   );
 }
 
-export default function Header() {
-  const [open, setOpen] = useState(false);
+export default async function Header() {
+  const user = await getCurrentUser();
+  const role = user?.role ?? null;
 
   return (
     <header className="bg-secondary sticky top-0 z-50 shadow-md">
       <div className="max-w-6xl mx-auto flex items-center justify-between px-4 py-3 relative">
-        <Link href="/" className="flex items-center gap-2 text-white text-lg font-heading font-extrabold">
+        <Link href={role === "ADMIN" ? "/admin" : "/"} className="flex items-center gap-2 text-white text-lg font-heading font-extrabold">
           <LogoIcon className="h-8 w-auto" />
           FIT &amp; FOOD <span className="text-primary">.</span>
         </Link>
 
-        <button className="md:hidden text-white p-1" onClick={() => setOpen((v) => !v)} aria-label="Menu">
-          {open ? <IconClose size={26} /> : <IconMenu size={26} />}
-        </button>
-
-        <ul
-          className={`md:flex md:static md:flex-row md:gap-5 md:bg-transparent md:p-0 md:shadow-none
-            ${open ? "flex" : "hidden"}
-            absolute top-full left-0 right-0 flex-col gap-3 bg-secondary-light px-5 py-4 shadow-xl`}
-        >
-          <li>
-            <Link href="/" onClick={() => setOpen(false)} className="text-white text-sm font-medium hover:text-primary">
-              S'abonner
-            </Link>
-          </li>
-          <li>
-            <Link href="/mon-espace" onClick={() => setOpen(false)} className="text-white text-sm font-medium hover:text-primary">
-              Mon Espace Client
-            </Link>
-          </li>
-          <li>
-            <Link href="/admin" onClick={() => setOpen(false)} className="bg-primary text-white text-sm font-semibold px-4 py-2 rounded-full inline-block">
-              Espace Admin
-            </Link>
-          </li>
-        </ul>
+        <HeaderNav role={role} />
       </div>
     </header>
   );

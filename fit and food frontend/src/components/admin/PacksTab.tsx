@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Pack } from "@/types";
+import SearchInput from "./SearchInput";
 
 export default function PacksTab() {
   const [packs, setPacks] = useState<Pack[]>([]);
   const [editingPrice, setEditingPrice] = useState<Record<string, string>>({});
   const [editingPromo, setEditingPromo] = useState<Record<string, string>>({});
+  const [search, setSearch] = useState("");
 
   const load = () => {
     fetch("/api/packs").then((res) => res.json()).then((data) => setPacks(data.packs ?? []));
@@ -49,19 +51,27 @@ export default function PacksTab() {
     load();
   };
 
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase();
+    return packs.filter((p) => p.goal.toLowerCase().includes(q) || p.formule.toLowerCase().includes(q));
+  }, [packs, search]);
+
   return (
     <div>
       <h4 className="font-heading text-secondary text-sm mb-3">Tarifs &amp; Promotions</h4>
-      <div className="overflow-x-auto scrollbar-hide touch-pan-x">
+
+      <SearchInput value={search} onChange={setSearch} placeholder="Rechercher un objectif, une formule..." />
+
+      <div className="mt-3 max-h-[420px] overflow-auto scrollbar-hide touch-pan-x">
         <table className="w-full text-sm whitespace-nowrap">
-          <thead>
+          <thead className="sticky top-0 bg-white">
             <tr className="text-left text-text-muted text-xs">
               <th className="pb-2 pr-4">Objectif</th><th className="pb-2 pr-4">Formule</th><th className="pb-2 pr-4">Prix</th>
               <th className="pb-2 pr-4">Promo (%)</th><th className="pb-2 pr-4">Prix final</th><th className="pb-2 pr-4">Statut</th><th className="pb-2 pr-4">Action</th>
             </tr>
           </thead>
           <tbody>
-            {packs.map((p) => (
+            {filtered.map((p) => (
               <tr key={p.id} className="border-t border-border">
                 <td className="py-2 pr-4">{p.goal}</td>
                 <td className="py-2 pr-4">{p.formule}</td>
@@ -107,6 +117,9 @@ export default function PacksTab() {
                 </td>
               </tr>
             ))}
+            {!filtered.length && (
+              <tr><td colSpan={7} className="text-text-muted py-3">Aucun résultat</td></tr>
+            )}
           </tbody>
         </table>
       </div>

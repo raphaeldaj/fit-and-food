@@ -10,13 +10,17 @@ export default async function MonEspacePage() {
   const user = await getCurrentUser();
   if (!user) redirect("/connexion");
 
-  const subscription = await db.subscription.findFirst({
-    where: { userId: user.id, status: { not: "CANCELLED" } },
+  const subscriptions = await db.subscription.findMany({
+    where: { userId: user.id },
     include: { pack: true, orders: { include: { payment: true }, orderBy: { cycleDate: "desc" } } },
     orderBy: { createdAt: "desc" },
   });
 
-  const gym = subscription?.gymId ? await db.gym.findUnique({ where: { id: subscription.gymId } }) : null;
+  const gymIds = [...new Set(subscriptions.map((s) => s.gymId).filter((id): id is string => !!id))];
+  const gyms = gymIds.length ? await db.gym.findMany({ where: { id: { in: gymIds } } }) : [];
+  const gymMap = new Map(gyms.map((g) => [g.id, g.name]));
+
+  const allOrders = subscriptions.flatMap((s) => s.orders.map((o) => ({ ...o, formule: s.pack.formule })));
 
   const reviews = await db.review.findMany({
     where: { userId: user.id },
@@ -28,49 +32,48 @@ export default async function MonEspacePage() {
   return (
     <div className="max-w-6xl mx-auto px-4 py-10">
       <h1 className="text-2xl font-heading text-secondary mb-1">Mon Espace Abonné</h1>
-      <p className="text-text-muted text-sm mb-8">Gérez votre abonnement, vos livraisons, paiements et avis</p>
+      <p className="text-text-muted text-sm mb-8">Gérez vos abonnements, vos livraisons, paiements et avis</p>
 
-      <div className="grid md:grid-cols-2 gap-6 mb-6">
-        <div className="bg-white rounded-xl p-6 shadow-sm">
-          <h3 className="font-heading text-secondary mb-4">Abonnement Actif</h3>
-          {subscription ? (
-            <>
-              <dl className="space-y-1.5 text-sm">
-                <Row label="Formule" value={`${subscription.pack.formule} — ${subscription.pack.goal.replace("_", " ")}`} />
-                <Row label="Statut" value={STATUS_LABELS[subscription.status]} />
-                <Row label="Créneau Livraison" value={subscription.slot} />
-                <Row label="Salle Partenaire" value={gym?.name ?? "-"} />
-                <Row label="Prochaine Échéance" value={subscription.nextDueDate.toLocaleDateString("fr-FR")} />
-              </dl>
-              <DashboardActions subscriptionId={subscription.id} status={subscription.status} />
-            </>
-          ) : (
-            <p className="text-text-muted text-sm">Aucun abonnement actif</p>
-          )}
-        </div>
+      <h3 className="font-heading text-secondary mb-3">Mes Abonnements</h3>
+      <div className="grid md:grid-cols-2 gap-6 mb-8">
+        {subscriptions.length ? subscriptions.map((sub) => (
+          <div key={sub.id} className="bg-white rounded-xl p-6 shadow-sm">
+            <dl className="space-y-1.5 text-sm">
+              <Row label="Formule" value={`${sub.pack.formule} — ${sub.pack.goal.replace("_", " ")}`} />
+              <Row label="Statut" value={STATUS_LABELS[sub.status]} />
+              <Row label="Créneau Livraison" value={sub.slot} />
+              <Row label="Salle Partenaire" value={sub.gymId ? gymMap.get(sub.gymId) ?? "-" : "-"} />
+              <Row label="Prochaine Échéance" value={sub.nextDueDate.toLocaleDateString("fr-FR")} />
+            </dl>
+            <DashboardActions subscriptionId={sub.id} status={sub.status} />
+          </div>
+        )) : (
+          <p className="text-text-muted text-sm">Aucun abonnement pour l&apos;instant.</p>
+        )}
+      </div>
 
-        <div className="bg-white rounded-xl p-6 shadow-sm overflow-x-auto">
-          <h3 className="font-heading text-secondary mb-4">Historique des Commandes</h3>
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left text-text-muted text-xs">
-                <th className="pb-2">Commande</th><th className="pb-2">Cycle</th><th className="pb-2">Montant</th><th className="pb-2">Statut</th>
+      <div className="bg-white rounded-xl p-6 shadow-sm mb-6 overflow-x-auto">
+        <h3 className="font-heading text-secondary mb-4">Historique des Commandes</h3>
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="text-left text-text-muted text-xs">
+              <th className="pb-2">Commande</th><th className="pb-2">Abonnement</th><th className="pb-2">Cycle</th><th className="pb-2">Montant</th><th className="pb-2">Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            {allOrders.length ? allOrders.map((o) => (
+              <tr key={o.id} className="border-t border-border">
+                <td className="py-2">#{o.id.slice(0, 6)}</td>
+                <td className="py-2">{o.formule}</td>
+                <td className="py-2">{o.cycleDate.toLocaleDateString("fr-FR")}</td>
+                <td className="py-2">{o.amount.toLocaleString("fr-FR")} F</td>
+                <td className="py-2">{o.status}</td>
               </tr>
-            </thead>
-            <tbody>
-              {subscription?.orders.length ? subscription.orders.map((o) => (
-                <tr key={o.id} className="border-t border-border">
-                  <td className="py-2">#{o.id.slice(0, 6)}</td>
-                  <td className="py-2">{o.cycleDate.toLocaleDateString("fr-FR")}</td>
-                  <td className="py-2">{o.amount.toLocaleString("fr-FR")} F</td>
-                  <td className="py-2">{o.status}</td>
-                </tr>
-              )) : (
-                <tr><td colSpan={4} className="text-text-muted py-3">Aucune commande</td></tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+            )) : (
+              <tr><td colSpan={5} className="text-text-muted py-3">Aucune commande</td></tr>
+            )}
+          </tbody>
+        </table>
       </div>
 
       <div className="bg-white rounded-xl p-6 shadow-sm mb-6 overflow-x-auto">
@@ -82,7 +85,7 @@ export default async function MonEspacePage() {
             </tr>
           </thead>
           <tbody>
-            {subscription?.orders.filter((o) => o.payment).length ? subscription.orders.filter((o) => o.payment).map((o) => (
+            {allOrders.filter((o) => o.payment).length ? allOrders.filter((o) => o.payment).map((o) => (
               <tr key={o.payment!.id} className="border-t border-border">
                 <td className="py-2">#{o.payment!.id.slice(0, 6)}</td>
                 <td className="py-2">{o.payment!.method}</td>

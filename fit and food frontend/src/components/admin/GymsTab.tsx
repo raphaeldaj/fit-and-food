@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import AddGymForm from "./AddGymForm";
+import SearchInput from "./SearchInput";
 
 interface AdminGym { id: string; name: string; address: string; active: boolean; _count: { users: number }; }
 
@@ -9,6 +10,7 @@ export default function GymsTab() {
   const [gyms, setGyms] = useState<AdminGym[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
 
   const load = () => {
     fetch("/api/admin/gyms").then((res) => res.json()).then((data) => setGyms(data.gyms ?? []));
@@ -33,6 +35,11 @@ export default function GymsTab() {
     load();
   };
 
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase();
+    return gyms.filter((g) => g.name.toLowerCase().includes(q) || g.address.toLowerCase().includes(q));
+  }, [gyms, search]);
+
   return (
     <div>
       <div className="flex justify-between items-center flex-wrap gap-2 mb-3">
@@ -48,16 +55,18 @@ export default function GymsTab() {
         <AddGymForm onCreated={() => { setShowForm(false); load(); }} onCancel={() => setShowForm(false)} />
       )}
 
-      <div className="overflow-x-auto scrollbar-hide touch-pan-x">
+      <SearchInput value={search} onChange={setSearch} placeholder="Rechercher une salle, une adresse..." />
+
+      <div className="mt-3 max-h-[420px] overflow-auto scrollbar-hide touch-pan-x">
         <table className="w-full text-sm whitespace-nowrap">
-          <thead>
+          <thead className="sticky top-0 bg-white">
             <tr className="text-left text-text-muted text-xs">
               <th className="pb-2 pr-4">Nom</th><th className="pb-2 pr-4">Adresse</th><th className="pb-2 pr-4">Clients rattachés</th>
               <th className="pb-2 pr-4">Statut</th><th className="pb-2 pr-4">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {gyms.map((g) => (
+            {filtered.map((g) => (
               <tr key={g.id} className="border-t border-border">
                 <td className="py-2 pr-4">{g.name}</td>
                 <td className="py-2 pr-4">{g.address}</td>
@@ -75,6 +84,9 @@ export default function GymsTab() {
                 </td>
               </tr>
             ))}
+            {!filtered.length && (
+              <tr><td colSpan={5} className="text-text-muted py-3">Aucun résultat</td></tr>
+            )}
           </tbody>
         </table>
       </div>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function DashboardActions({ subscriptionId, status }: { subscriptionId: string; status: string }) {
   const router = useRouter();
@@ -16,9 +17,12 @@ export default function DashboardActions({ subscriptionId, status }: { subscript
 
   return (
     <div className="flex gap-2 flex-wrap mt-4">
-      <button disabled={loading} className="border border-border text-text-dark text-xs font-semibold px-3.5 py-2 rounded-md">
+      <Link
+        href={`/mon-espace/abonnements/${subscriptionId}`}
+        className="border border-border text-text-dark text-xs font-semibold px-3.5 py-2 rounded-md"
+      >
         Modifier composition
-      </button>
+      </Link>
       <button disabled={loading || status !== "ACTIVE"} onClick={() => callAction("suspend")} className="border border-border text-text-dark text-xs font-semibold px-3.5 py-2 rounded-md disabled:opacity-40">
         Suspendre
       </button>

@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import AddMealForm from "./AddMealForm";
+import SearchInput from "./SearchInput";
 
 interface AdminMeal { id: string; name: string; type: string; calories: number; proteins: number; availability: "IN_STOCK" | "OUT_OF_STOCK"; categories: string[]; }
 
@@ -9,6 +10,7 @@ export default function CatalogTab() {
   const [meals, setMeals] = useState<AdminMeal[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
 
   const load = () => {
     fetch("/api/admin/catalog").then((res) => res.json()).then((data) => setMeals(data.meals ?? []));
@@ -33,6 +35,13 @@ export default function CatalogTab() {
     load();
   };
 
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase();
+    return meals.filter((m) =>
+      m.name.toLowerCase().includes(q) || m.type.toLowerCase().includes(q) || m.categories.some((c) => c.toLowerCase().includes(q))
+    );
+  }, [meals, search]);
+
   return (
     <div>
       <div className="flex justify-between items-center flex-wrap gap-2 mb-3">
@@ -48,16 +57,18 @@ export default function CatalogTab() {
         <AddMealForm onCreated={() => { setShowForm(false); load(); }} onCancel={() => setShowForm(false)} />
       )}
 
-      <div className="overflow-x-auto scrollbar-hide touch-pan-x">
+      <SearchInput value={search} onChange={setSearch} placeholder="Rechercher un plat, une catégorie..." />
+
+      <div className="mt-3 max-h-[420px] overflow-auto scrollbar-hide touch-pan-x">
         <table className="w-full text-sm whitespace-nowrap">
-          <thead>
+          <thead className="sticky top-0 bg-white">
             <tr className="text-left text-text-muted text-xs">
               <th className="pb-2 pr-4">Nom</th><th className="pb-2 pr-4">Type</th><th className="pb-2 pr-4">Kcal</th>
               <th className="pb-2 pr-4">Protéines</th><th className="pb-2 pr-4">Catégories</th><th className="pb-2 pr-4">Statut</th><th className="pb-2 pr-4">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {meals.map((m) => (
+            {filtered.map((m) => (
               <tr key={m.id} className="border-t border-border">
                 <td className="py-2 pr-4">{m.name}</td>
                 <td className="py-2 pr-4">{m.type}</td>
@@ -77,6 +88,9 @@ export default function CatalogTab() {
                 </td>
               </tr>
             ))}
+            {!filtered.length && (
+              <tr><td colSpan={7} className="text-text-muted py-3">Aucun résultat</td></tr>
+            )}
           </tbody>
         </table>
       </div>

@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { Prisma } from "@/generated/prisma";
+import { requireAdmin } from "@/lib/auth/requireAdmin";
 
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+  const { error } = await requireAdmin();
+  if (error) return error;
 
+  const { id } = await params;
   const meal = await db.mealItem.findUnique({ where: { id } });
   if (!meal) return NextResponse.json({ error: "Plat introuvable." }, { status: 404 });
 
@@ -21,6 +24,5 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
   }
 
   await db.adminLog.create({ data: { adminName: "Admin", action: `Plat supprimé : ${meal.name}` } });
-
   return NextResponse.json({ success: true });
 }

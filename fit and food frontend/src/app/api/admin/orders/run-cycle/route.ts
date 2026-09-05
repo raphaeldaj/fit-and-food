@@ -1,8 +1,12 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getEffectivePrice } from "@/lib/pricing";
+import { requireAdmin } from "@/lib/auth/requireAdmin";
 
 export async function POST() {
+  const { error } = await requireAdmin();
+  if (error) return error;
+
   const now = new Date();
   const dueSubscriptions = await db.subscription.findMany({
     where: { status: "ACTIVE", nextDueDate: { lte: now } },
@@ -14,7 +18,6 @@ export async function POST() {
   for (const sub of dueSubscriptions) {
     const order = await db.order.create({ data: { subscriptionId: sub.id, amount: getEffectivePrice(sub.pack), status: "PENDING" } });
 
-    // Simulation du paiement — en production, ceci vient du webhook Wave/Orange Money
     const success = Math.random() > 0.15;
     await db.payment.create({ data: { orderId: order.id, method: sub.paymentMethod, status: success ? "SUCCESS" : "FAILED" } });
     await db.order.update({ where: { id: order.id }, data: { status: success ? "PAID" : "FAILED" } });

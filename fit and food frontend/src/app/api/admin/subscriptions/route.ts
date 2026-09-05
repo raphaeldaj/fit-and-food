@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { requireAdmin } from "@/lib/auth/requireAdmin";
 
 export async function GET() {
+  const { error } = await requireAdmin();
+  if (error) return error;
+
   const subs = await db.subscription.findMany({
     include: { user: true, pack: true, gym: true },
     orderBy: { createdAt: "desc" },
