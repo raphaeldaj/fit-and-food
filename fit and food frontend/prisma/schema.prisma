@@ -64,6 +64,8 @@ model User {
 
   failedLoginCount  Int       @default(0)
   lockedUntil       DateTime?
+  failed2FACount     Int       @default(0)
+  locked2FAUntil     DateTime?
 
   subscriptions     Subscription[]
   reviews           Review[]

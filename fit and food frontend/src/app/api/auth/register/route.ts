@@ -2,8 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { registerSchema } from "@/lib/validators/auth";
 import { hashPassword } from "@/lib/auth/password";
 import { db } from "@/lib/db";
+import { rateLimit, getClientIp } from "@/lib/rateLimit";
 
 export async function POST(req: NextRequest) {
+  const ip = getClientIp(req);
+  const { allowed } = rateLimit(`register:${ip}`, 5, 60_000); 
+  if (!allowed) {
+    return NextResponse.json({ error: "Trop de tentatives. Réessaie dans une minute." }, { status: 429 });
+  }
+
   const body = await req.json();
   const parsed = registerSchema.safeParse(body);
 

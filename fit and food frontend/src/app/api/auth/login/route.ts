@@ -3,12 +3,19 @@ import { loginSchema } from "@/lib/validators/auth";
 import { verifyPassword } from "@/lib/auth/password";
 import { signAccessToken, signRefreshToken } from "@/lib/auth/jwt";
 import { db } from "@/lib/db";
+import { rateLimit, getClientIp } from "@/lib/rateLimit";
 
 const MAX_ATTEMPTS = 5;
 const LOCK_MINUTES = 15;
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = getClientIp(req);
+    const { allowed } = rateLimit(`login:${ip}`, 10, 60_000); // 10 tentatives / minute / IP
+    if (!allowed) {
+      return NextResponse.json({ error: "Trop de tentatives. Réessaie dans une minute." }, { status: 429 });
+    }
+
     const body = await req.json();
     const parsed = loginSchema.safeParse(body);
     if (!parsed.success) {

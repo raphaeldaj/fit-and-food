@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { getEffectivePrice } from "@/lib/pricing";
+import { rateLimit, getClientIp } from "@/lib/rateLimit";
 
 function nextDueDate(slot: "LUNDI" | "JEUDI") {
   const now = new Date();
@@ -15,6 +16,12 @@ function nextDueDate(slot: "LUNDI" | "JEUDI") {
 }
 
 export async function POST(req: NextRequest) {
+  const ip = getClientIp(req);
+  const { allowed } = rateLimit(`subscribe:${ip}`, 20, 60_000);
+  if (!allowed) {
+    return NextResponse.json({ error: "Trop de requêtes. Réessaie dans un instant." }, { status: 429 });
+  }
+
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Connecte-toi pour t'abonner." }, { status: 401 });
 
@@ -39,11 +46,6 @@ export async function POST(req: NextRequest) {
       items: { create: items.map((it: { mealId: string; quantity: number }) => ({ mealId: it.mealId, quantity: it.quantity })) },
     },
   });
-
-//   const pack = await db.pack.findUnique({ where: { id: packId } });
-//   const order = await db.order.create({
-//     data: { subscriptionId: subscription.id, amount: pack?.price ?? 0, status: "PENDING" },
-//   });
 
   const pack = await db.pack.findUnique({ where: { id: packId } });
   const order = await db.order.create({
