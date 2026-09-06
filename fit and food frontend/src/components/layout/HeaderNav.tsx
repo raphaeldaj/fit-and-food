@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { IconMenu, IconClose } from "@/components/icons";
+import LogoutButton from "./LogoutButton";
 
 export default function HeaderNav({ role }: { role: "CLIENT" | "ADMIN" | null }) {
   const [open, setOpen] = useState(false);
@@ -22,9 +23,9 @@ export default function HeaderNav({ role }: { role: "CLIENT" | "ADMIN" | null })
       </button>
 
       <ul
-        className={`md:flex md:static md:flex-row md:gap-5 md:bg-transparent md:p-0 md:shadow-none
+        className={`md:flex md:static md:flex-row md:gap-5 md:bg-transparent md:p-0 md:shadow-none md:items-center
           ${open ? "flex" : "hidden"}
-          absolute top-full left-0 right-0 flex-col gap-3 bg-secondary-light px-5 py-4 shadow-xl`}
+          absolute top-full left-0 right-0 flex-col gap-3 bg-secondary-light px-5 py-4 shadow-xl md:items-start`}
       >
         {links.map((link) => (
           <li key={link.href}>
@@ -33,6 +34,11 @@ export default function HeaderNav({ role }: { role: "CLIENT" | "ADMIN" | null })
             </Link>
           </li>
         ))}
+        {role && (
+          <li>
+            <LogoutButton />
+          </li>
+        )}
       </ul>
     </>
   );
