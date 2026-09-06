@@ -19,7 +19,7 @@ export default function TwoFactorForm({ userId }: { userId: string }) {
     formState: { errors, isSubmitting },
   } = useForm<TwoFactorData>({ resolver: zodResolver(twoFactorSchema) });
 
-  const onSubmit = async (data: TwoFactorData) => {
+    const onSubmit = async (data: TwoFactorData) => {
     setError(null);
     const res = await fetch("/api/auth/2fa/verify", {
       method: "POST",
@@ -32,7 +32,8 @@ export default function TwoFactorForm({ userId }: { userId: string }) {
       setError(json.error ?? "Code invalide.");
       return;
     }
-    router.push("/mon-espace");
+    router.push(json.role === "ADMIN" ? "/admin" : "/mon-espace");
+    router.refresh();
   };
 
   return (

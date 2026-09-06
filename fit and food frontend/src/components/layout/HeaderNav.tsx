@@ -8,13 +8,17 @@ import LogoutButton from "./LogoutButton";
 export default function HeaderNav({ role }: { role: "CLIENT" | "ADMIN" | null }) {
   const [open, setOpen] = useState(false);
 
-  const links =
-    role === "ADMIN"
-      ? [{ href: "/admin", label: "Dashboard Admin" }]
-      : [
-          { href: "/", label: "S'abonner" },
-          { href: "/mon-espace", label: "Mon Espace Client" },
-        ];
+  let links: { href: string; label: string }[] = [];
+  if (role === "ADMIN") {
+    links = [{ href: "/admin", label: "Dashboard Admin" }];
+  } else if (role === "CLIENT") {
+    links = [
+      { href: "/", label: "S'abonner" },
+      { href: "/mon-espace", label: "Mon Espace Client" },
+    ];
+  } else {
+    links = [{ href: "/", label: "S'abonner" }];
+  }
 
   return (
     <>
@@ -34,9 +38,16 @@ export default function HeaderNav({ role }: { role: "CLIENT" | "ADMIN" | null })
             </Link>
           </li>
         ))}
-        {role && (
+        {role !== null && (
           <li>
             <LogoutButton />
+          </li>
+        )}
+        {role === null && (
+          <li>
+            <Link href="/connexion" onClick={() => setOpen(false)} className="text-white text-sm font-medium hover:text-primary">
+              Connexion
+            </Link>
           </li>
         )}
       </ul>

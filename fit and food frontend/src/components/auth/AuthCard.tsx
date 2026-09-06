@@ -30,7 +30,7 @@ export default function AuthCard({ initialMode = "login" }: { initialMode?: "log
   const loginForm = useForm<LoginData>({ resolver: zodResolver(loginSchema) });
   const registerForm = useForm<RegisterData>({ resolver: zodResolver(registerFormSchema) });
 
-  const onLogin = async (data: LoginData) => {
+    const onLogin = async (data: LoginData) => {
     setLoginError(null);
     const res = await fetch("/api/auth/login", {
       method: "POST",
@@ -47,7 +47,8 @@ export default function AuthCard({ initialMode = "login" }: { initialMode?: "log
       router.push(`/verification-2fa?userId=${json.userId}`);
       return;
     }
-    router.push("/mon-espace");
+    router.push(json.role === "ADMIN" ? "/admin" : "/mon-espace");
+    router.refresh();
   };
 
   const onRegister = async (data: RegisterData) => {
