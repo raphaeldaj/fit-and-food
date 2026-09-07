@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/session";
 import { db } from "@/lib/db";
+import { encryptField } from "@/lib/security/crypto";
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -17,6 +18,10 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     return NextResponse.json({ error: "Adresse et téléphone obligatoires." }, { status: 400 });
   }
 
-  await db.subscription.update({ where: { id }, data: { address, phone } });
+  await db.subscription.update({
+    where: { id },
+    data: { address: encryptField(address), phone: encryptField(phone) },
+  });
+
   return NextResponse.json({ success: true });
 }

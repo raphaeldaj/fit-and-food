@@ -5,6 +5,7 @@ import DashboardActions from "@/components/dashboard/DashboardActions";
 import EditDeliveryInfo from "@/components/dashboard/EditDeliveryInfo";
 import ReviewForm from "@/components/dashboard/ReviewForm";
 import { IconStar } from "@/components/icons";
+import { decryptField } from "@/lib/security/crypto";
 import Link from "next/link";
 
 const STATUS_LABELS: Record<string, string> = { ACTIVE: "Actif", SUSPENDED: "Suspendu", CANCELLED: "Annulé" };
@@ -42,21 +43,25 @@ export default async function MonEspacePage() {
 
       <h3 className="font-heading text-secondary mb-3">Mes Abonnements</h3>
       <div className="grid md:grid-cols-2 gap-6 mb-8">
-        {subscriptions.length ? subscriptions.map((sub) => (
-          <div key={sub.id} className="bg-white rounded-xl p-6 shadow-sm">
-            <dl className="space-y-1.5 text-sm">
-              <Row label="Formule" value={`${sub.pack.formule} — ${sub.pack.goal.replace("_", " ")}`} />
-              <Row label="Statut" value={STATUS_LABELS[sub.status]} />
-              <Row label="Créneau Livraison" value={sub.slot} />
-              <Row label="Salle Partenaire" value={sub.gymId ? gymMap.get(sub.gymId) ?? "-" : "-"} />
-              <Row label="Adresse" value={sub.address} />
-              <Row label="Téléphone" value={sub.phone} />
-              <Row label="Prochaine Échéance" value={sub.nextDueDate.toLocaleDateString("fr-FR")} />
-            </dl>
-            <EditDeliveryInfo subscriptionId={sub.id} initialAddress={sub.address} initialPhone={sub.phone} />
-            <DashboardActions subscriptionId={sub.id} status={sub.status} />
-          </div>
-        )) : (
+        {subscriptions.length ? subscriptions.map((sub) => {
+          const address = decryptField(sub.address);
+          const phone = decryptField(sub.phone);
+          return (
+            <div key={sub.id} className="bg-white rounded-xl p-6 shadow-sm">
+              <dl className="space-y-1.5 text-sm">
+                <Row label="Formule" value={`${sub.pack.formule} — ${sub.pack.goal.replace("_", " ")}`} />
+                <Row label="Statut" value={STATUS_LABELS[sub.status]} />
+                <Row label="Créneau Livraison" value={sub.slot} />
+                <Row label="Salle Partenaire" value={sub.gymId ? gymMap.get(sub.gymId) ?? "-" : "-"} />
+                <Row label="Adresse" value={address} />
+                <Row label="Téléphone" value={phone} />
+                <Row label="Prochaine Échéance" value={sub.nextDueDate.toLocaleDateString("fr-FR")} />
+              </dl>
+              <EditDeliveryInfo subscriptionId={sub.id} initialAddress={address} initialPhone={phone} />
+              <DashboardActions subscriptionId={sub.id} status={sub.status} />
+            </div>
+          );
+        }) : (
           <p className="text-text-muted text-sm">Aucun abonnement pour l&apos;instant.</p>
         )}
       </div>

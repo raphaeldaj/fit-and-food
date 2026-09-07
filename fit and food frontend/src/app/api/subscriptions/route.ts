@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { getEffectivePrice } from "@/lib/pricing";
 import { rateLimit, getClientIp } from "@/lib/rateLimit";
+import { encryptField } from "@/lib/security/crypto";
 
 function nextDueDate(slot: "LUNDI" | "JEUDI") {
   const now = new Date();
@@ -39,8 +40,8 @@ export async function POST(req: NextRequest) {
       mixedGoal: !!mixedGoal,
       slot,
       paymentMethod,
-      address,
-      phone,
+      address: encryptField(address),
+      phone: encryptField(phone),
       gymId: gymId || null,
       nextDueDate: nextDueDate(slot),
       items: { create: items.map((it: { mealId: string; quantity: number }) => ({ mealId: it.mealId, quantity: it.quantity })) },
