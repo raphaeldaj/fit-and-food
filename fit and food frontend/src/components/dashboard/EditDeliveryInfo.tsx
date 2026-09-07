@@ -29,9 +29,10 @@ export default function EditDeliveryInfo({ subscriptionId, initialAddress, initi
     router.refresh();
   };
 
-  if (!editing) {
+
+    if (!editing) {
     return (
-      <button onClick={() => setEditing(true)} className="text-xs text-secondary underline mt-2">
+      <button onClick={() => setEditing(true)} className="border border-border text-text-dark text-xs font-semibold px-3.5 py-2 rounded-md mt-2">
         Modifier adresse / téléphone
       </button>
     );

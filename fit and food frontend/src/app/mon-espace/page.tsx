@@ -35,10 +35,12 @@ export default async function MonEspacePage() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-10">
-      <div className="flex justify-between items-start flex-wrap gap-2 mb-1">
+    <div className="flex justify-between items-start flex-wrap gap-2 mb-1">
         <h1 className="text-2xl font-heading text-secondary">Mon Espace Abonné</h1>
-        <Link href="/mon-espace/parametres" className="text-sm text-secondary underline">Paramètres du compte</Link>
-      </div>
+        <Link href="/mon-espace/parametres" className="border border-border text-text-dark text-xs font-semibold px-3.5 py-2 rounded-md">
+          Paramètres du compte
+        </Link>
+    </div>
       <p className="text-text-muted text-sm mb-8">Gérez vos abonnements, vos livraisons, paiements et avis</p>
 
       <h3 className="font-heading text-secondary mb-3">Mes Abonnements</h3>
