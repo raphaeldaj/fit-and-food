@@ -2,7 +2,10 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import DashboardActions from "@/components/dashboard/DashboardActions";
+import EditDeliveryInfo from "@/components/dashboard/EditDeliveryInfo";
+import ReviewForm from "@/components/dashboard/ReviewForm";
 import { IconStar } from "@/components/icons";
+import Link from "next/link";
 
 const STATUS_LABELS: Record<string, string> = { ACTIVE: "Actif", SUSPENDED: "Suspendu", CANCELLED: "Annulé" };
 
@@ -31,7 +34,10 @@ export default async function MonEspacePage() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-10">
-      <h1 className="text-2xl font-heading text-secondary mb-1">Mon Espace Abonné</h1>
+      <div className="flex justify-between items-start flex-wrap gap-2 mb-1">
+        <h1 className="text-2xl font-heading text-secondary">Mon Espace Abonné</h1>
+        <Link href="/mon-espace/parametres" className="text-sm text-secondary underline">Paramètres du compte</Link>
+      </div>
       <p className="text-text-muted text-sm mb-8">Gérez vos abonnements, vos livraisons, paiements et avis</p>
 
       <h3 className="font-heading text-secondary mb-3">Mes Abonnements</h3>
@@ -43,8 +49,11 @@ export default async function MonEspacePage() {
               <Row label="Statut" value={STATUS_LABELS[sub.status]} />
               <Row label="Créneau Livraison" value={sub.slot} />
               <Row label="Salle Partenaire" value={sub.gymId ? gymMap.get(sub.gymId) ?? "-" : "-"} />
+              <Row label="Adresse" value={sub.address} />
+              <Row label="Téléphone" value={sub.phone} />
               <Row label="Prochaine Échéance" value={sub.nextDueDate.toLocaleDateString("fr-FR")} />
             </dl>
+            <EditDeliveryInfo subscriptionId={sub.id} initialAddress={sub.address} initialPhone={sub.phone} />
             <DashboardActions subscriptionId={sub.id} status={sub.status} />
           </div>
         )) : (
@@ -101,6 +110,9 @@ export default async function MonEspacePage() {
 
       <div className="bg-white rounded-xl p-6 shadow-sm overflow-x-auto">
         <h3 className="font-heading text-secondary mb-4">Repas Reçus &amp; Avis</h3>
+
+        <ReviewForm />
+
         <table className="w-full text-sm">
           <thead>
             <tr className="text-left text-text-muted text-xs">

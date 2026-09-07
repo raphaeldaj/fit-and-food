@@ -52,5 +52,9 @@ export async function POST(req: NextRequest) {
     data: { subscriptionId: subscription.id, amount: pack ? getEffectivePrice(pack) : 0, status: "PENDING" },
   });
 
+  await db.adminLog.create({
+    data: { adminName: "Système", action: `Nouvelle souscription de ${user.fullName} — ${pack?.formule ?? ""} (${pack?.goal ?? ""})` },
+  });
+
   return NextResponse.json({ subscriptionId: subscription.id, orderId: order.id }, { status: 201 });
 }

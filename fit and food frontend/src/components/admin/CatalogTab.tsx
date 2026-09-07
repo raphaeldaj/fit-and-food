@@ -1,14 +1,22 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import AddMealForm from "./AddMealForm";
+import MealForm from "./MealForm";
 import SearchInput from "./SearchInput";
 
-interface AdminMeal { id: string; name: string; type: string; calories: number; proteins: number; availability: "IN_STOCK" | "OUT_OF_STOCK"; categories: string[]; }
+interface AdminMeal {
+  id: string; name: string; type: string; calories: number; proteins: number;
+  goal: "PRISE_DE_MASSE" | "PERTE_DE_POIDS" | null;
+  photoUrl: string | null;
+  availability: "IN_STOCK" | "OUT_OF_STOCK";
+  categories: string[];
+  allergenTags: string[];
+}
 
 export default function CatalogTab() {
   const [meals, setMeals] = useState<AdminMeal[]>([]);
-  const [showForm, setShowForm] = useState(false);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
 
@@ -42,19 +50,42 @@ export default function CatalogTab() {
     );
   }, [meals, search]);
 
+  const editingMeal = meals.find((m) => m.id === editingId);
+
   return (
     <div>
       <div className="flex justify-between items-center flex-wrap gap-2 mb-3">
         <h4 className="font-heading text-secondary text-sm">Gestion du Catalogue Repas</h4>
-        <button onClick={() => setShowForm((v) => !v)} className="bg-primary text-white text-xs font-semibold px-3.5 py-2 rounded-md shrink-0">
-          {showForm ? "Fermer" : "+ Ajouter un Plat"}
+        <button
+          onClick={() => { setShowAddForm((v) => !v); setEditingId(null); }}
+          className="bg-primary text-white text-xs font-semibold px-3.5 py-2 rounded-md shrink-0"
+        >
+          {showAddForm ? "Fermer" : "+ Ajouter un Plat"}
         </button>
       </div>
 
       {error && <p className="bg-danger/10 text-danger text-sm rounded-md p-2 mb-3">{error}</p>}
 
-      {showForm && (
-        <AddMealForm onCreated={() => { setShowForm(false); load(); }} onCancel={() => setShowForm(false)} />
+      {showAddForm && (
+        <MealForm onSaved={() => { setShowAddForm(false); load(); }} onCancel={() => setShowAddForm(false)} />
+      )}
+
+      {editingMeal && (
+        <MealForm
+          initial={{
+            id: editingMeal.id,
+            name: editingMeal.name,
+            type: editingMeal.type,
+            calories: editingMeal.calories,
+            proteins: editingMeal.proteins,
+            goal: editingMeal.goal ?? "",
+            photoUrl: editingMeal.photoUrl ?? "",
+            categories: editingMeal.categories,
+            allergenTags: editingMeal.allergenTags,
+          }}
+          onSaved={() => { setEditingId(null); load(); }}
+          onCancel={() => setEditingId(null)}
+        />
       )}
 
       <SearchInput value={search} onChange={setSearch} placeholder="Rechercher un plat, une catégorie..." />
@@ -78,6 +109,9 @@ export default function CatalogTab() {
                 <td className="py-2 pr-4">{m.availability === "IN_STOCK" ? "En stock" : "Rupture"}</td>
                 <td className="py-2 pr-4">
                   <div className="flex gap-2">
+                    <button onClick={() => { setEditingId(m.id); setShowAddForm(false); }} className="text-xs font-semibold px-3 py-1.5 rounded-md border border-secondary text-secondary">
+                      Modifier
+                    </button>
                     <button onClick={() => toggleStock(m.id)} className="text-xs font-semibold px-3 py-1.5 rounded-md bg-secondary text-white">
                       Basculer
                     </button>

@@ -1,14 +1,15 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import AddGymForm from "./AddGymForm";
+import GymForm from "./GymForm";
 import SearchInput from "./SearchInput";
 
 interface AdminGym { id: string; name: string; address: string; active: boolean; _count: { users: number }; }
 
 export default function GymsTab() {
   const [gyms, setGyms] = useState<AdminGym[]>([]);
-  const [showForm, setShowForm] = useState(false);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
 
@@ -40,19 +41,32 @@ export default function GymsTab() {
     return gyms.filter((g) => g.name.toLowerCase().includes(q) || g.address.toLowerCase().includes(q));
   }, [gyms, search]);
 
+  const editingGym = gyms.find((g) => g.id === editingId);
+
   return (
     <div>
       <div className="flex justify-between items-center flex-wrap gap-2 mb-3">
         <h4 className="font-heading text-secondary text-sm">Salles de Sport Partenaires</h4>
-        <button onClick={() => setShowForm((v) => !v)} className="bg-primary text-white text-xs font-semibold px-3.5 py-2 rounded-md shrink-0">
-          {showForm ? "Fermer" : "+ Ajouter une Salle"}
+        <button
+          onClick={() => { setShowAddForm((v) => !v); setEditingId(null); }}
+          className="bg-primary text-white text-xs font-semibold px-3.5 py-2 rounded-md shrink-0"
+        >
+          {showAddForm ? "Fermer" : "+ Ajouter une Salle"}
         </button>
       </div>
 
       {error && <p className="bg-danger/10 text-danger text-sm rounded-md p-2 mb-3">{error}</p>}
 
-      {showForm && (
-        <AddGymForm onCreated={() => { setShowForm(false); load(); }} onCancel={() => setShowForm(false)} />
+      {showAddForm && (
+        <GymForm onSaved={() => { setShowAddForm(false); load(); }} onCancel={() => setShowAddForm(false)} />
+      )}
+
+      {editingGym && (
+        <GymForm
+          initial={{ id: editingGym.id, name: editingGym.name, address: editingGym.address }}
+          onSaved={() => { setEditingId(null); load(); }}
+          onCancel={() => setEditingId(null)}
+        />
       )}
 
       <SearchInput value={search} onChange={setSearch} placeholder="Rechercher une salle, une adresse..." />
@@ -74,6 +88,9 @@ export default function GymsTab() {
                 <td className="py-2 pr-4">{g.active ? "Active" : "Inactive"}</td>
                 <td className="py-2 pr-4">
                   <div className="flex gap-2">
+                    <button onClick={() => { setEditingId(g.id); setShowAddForm(false); }} className="text-xs font-semibold px-3 py-1.5 rounded-md border border-secondary text-secondary">
+                      Modifier
+                    </button>
                     <button onClick={() => toggle(g.id)} className="text-xs font-semibold px-3 py-1.5 rounded-md bg-secondary text-white">
                       Basculer
                     </button>

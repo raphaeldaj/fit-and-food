@@ -1,7 +1,23 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { Prisma } from "@/generated/prisma";
 import { requireAdmin } from "@/lib/auth/requireAdmin";
+
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { error } = await requireAdmin();
+  if (error) return error;
+
+  const { id } = await params;
+  const { name, address } = await req.json();
+  if (!name || !address) {
+    return NextResponse.json({ error: "Nom et adresse obligatoires." }, { status: 400 });
+  }
+
+  const gym = await db.gym.update({ where: { id }, data: { name, address } });
+  await db.adminLog.create({ data: { adminName: "Admin", action: `Salle modifiée : ${gym.name}` } });
+
+  return NextResponse.json({ gym });
+}
 
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { error } = await requireAdmin();
