@@ -163,12 +163,7 @@ async function main() {
     data: { promoActive: true, promoPercent: 15 },
   });
 
-  await prisma.adminLog.createMany({
-    data: [
-      { adminName: "Amina Ba", action: "Compte de test initialisé via seed" },
-      { adminName: "Système (cron)", action: "Cycle de reconduction simulé (données de seed)" },
-    ],
-  });
+
 
   console.log("✅ Données de test générées.");
   console.log("");
