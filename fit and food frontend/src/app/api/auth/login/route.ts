@@ -4,6 +4,7 @@ import { verifyPassword } from "@/lib/auth/password";
 import { signAccessToken, signRefreshToken } from "@/lib/auth/jwt";
 import { db } from "@/lib/db";
 import { rateLimit, getClientIp } from "@/lib/rateLimit";
+import { logActivity } from "@/lib/security/activityLog";
 
 const MAX_ATTEMPTS = 5;
 const LOCK_MINUTES = 15;
@@ -11,7 +12,7 @@ const LOCK_MINUTES = 15;
 export async function POST(req: NextRequest) {
   try {
     const ip = getClientIp(req);
-    const { allowed } = rateLimit(`login:${ip}`, 10, 60_000); // 10 tentatives / minute / IP
+    const { allowed } = rateLimit(`login:${ip}`, 10, 60_000);
     if (!allowed) {
       return NextResponse.json({ error: "Trop de tentatives. Réessaie dans une minute." }, { status: 429 });
     }
@@ -26,22 +27,31 @@ export async function POST(req: NextRequest) {
     const user = await db.user.findUnique({ where: { email } });
 
     if (!user) {
+      await logActivity({ userName: email, action: "Tentative de connexion échouée (compte inconnu)" });
       return NextResponse.json({ error: "Identifiants incorrects." }, { status: 401 });
     }
 
     if (user.lockedUntil && user.lockedUntil > new Date()) {
+      await logActivity({ userId: user.id, userName: user.fullName, role: user.role, action: "Connexion refusée (compte verrouillé)" });
       return NextResponse.json({ error: "Compte temporairement verrouillé." }, { status: 423 });
     }
 
     const valid = await verifyPassword(password, user.passwordHash);
     if (!valid) {
       const attempts = user.failedLoginCount + 1;
+      const willLock = attempts >= MAX_ATTEMPTS;
       await db.user.update({
         where: { id: user.id },
         data: {
           failedLoginCount: attempts,
-          lockedUntil: attempts >= MAX_ATTEMPTS ? new Date(Date.now() + LOCK_MINUTES * 60_000) : null,
+          lockedUntil: willLock ? new Date(Date.now() + LOCK_MINUTES * 60_000) : null,
         },
+      });
+      await logActivity({
+        userId: user.id,
+        userName: user.fullName,
+        role: user.role,
+        action: willLock ? "Compte verrouillé (trop d'échecs de connexion)" : "Tentative de connexion échouée (mot de passe incorrect)",
       });
       return NextResponse.json({ error: "Identifiants incorrects." }, { status: 401 });
     }
@@ -55,7 +65,9 @@ export async function POST(req: NextRequest) {
     const accessToken = await signAccessToken(user.id, user.role);
     const refreshToken = await signRefreshToken(user.id);
 
-    const res = NextResponse.json({ success: true });
+    await logActivity({ userId: user.id, userName: user.fullName, role: user.role, action: "Connexion" });
+
+    const res = NextResponse.json({ success: true, role: user.role });
     setAuthCookies(res, accessToken, refreshToken);
     return res;
   } catch (err) {

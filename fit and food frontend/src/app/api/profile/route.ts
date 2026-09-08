@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/session";
 import { db } from "@/lib/db";
+import { logActivity } from "@/lib/security/activityLog";
 
 export async function PATCH(req: NextRequest) {
   const user = await getCurrentUser();
@@ -17,5 +18,7 @@ export async function PATCH(req: NextRequest) {
   }
 
   await db.user.update({ where: { id: user.id }, data: { fullName, phone } });
+  await logActivity({ userId: user.id, userName: fullName, role: user.role, action: "Modification du profil" });
+
   return NextResponse.json({ success: true });
 }

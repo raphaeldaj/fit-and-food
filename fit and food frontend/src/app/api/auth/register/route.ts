@@ -3,6 +3,7 @@ import { registerSchema } from "@/lib/validators/auth";
 import { hashPassword } from "@/lib/auth/password";
 import { db } from "@/lib/db";
 import { rateLimit, getClientIp } from "@/lib/rateLimit";
+import { logActivity } from "@/lib/security/activityLog";
 
 export async function POST(req: NextRequest) {
   try {
@@ -31,6 +32,8 @@ export async function POST(req: NextRequest) {
     const user = await db.user.create({
       data: { fullName, email, phone, passwordHash, gymId: gymId || null },
     });
+
+    await logActivity({ userId: user.id, userName: user.fullName, role: "CLIENT", action: "Inscription" });
 
     return NextResponse.json({ id: user.id, email: user.email }, { status: 201 });
   } catch (err) {

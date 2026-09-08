@@ -194,9 +194,11 @@ model Review {
   createdAt DateTime @default(now())
 }
 
-model AdminLog {
+model ActivityLog {
   id        String   @id @default(cuid())
-  adminName String
+  userId    String?
+  userName  String
+  role      String?
   action    String
   createdAt DateTime @default(now())
 }

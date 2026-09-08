@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { encryptField } from "@/lib/security/crypto";
+import { logActivity } from "@/lib/security/activityLog";
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -22,6 +23,8 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     where: { id },
     data: { address: encryptField(address), phone: encryptField(phone) },
   });
+
+  await logActivity({ userId: user.id, userName: user.fullName, role: user.role, action: `Modification adresse/téléphone de livraison — abonnement #${id.slice(0, 6)}` });
 
   return NextResponse.json({ success: true });
 }

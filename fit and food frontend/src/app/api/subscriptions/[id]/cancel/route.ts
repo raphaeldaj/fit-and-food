@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/session";
 import { db } from "@/lib/db";
+import { logActivity } from "@/lib/security/activityLog";
 
 export async function POST(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const user = await getCurrentUser();
@@ -14,5 +15,7 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
   }
 
   await db.subscription.update({ where: { id }, data: { status: "CANCELLED" } });
+  await logActivity({ userId: user.id, userName: user.fullName, role: user.role, action: `Annulation de l'abonnement #${id.slice(0, 6)}` });
+
   return NextResponse.json({ success: true });
 }

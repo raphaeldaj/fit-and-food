@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/session";
 import { db } from "@/lib/db";
+import { logActivity } from "@/lib/security/activityLog";
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -47,6 +48,8 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       data: items.map((it) => ({ subscriptionId: id, mealId: it.mealId, quantity: it.quantity })),
     }),
   ]);
+
+  await logActivity({ userId: user.id, userName: user.fullName, role: user.role, action: `Modification de la composition — abonnement #${id.slice(0, 6)}` });
 
   return NextResponse.json({ success: true });
 }

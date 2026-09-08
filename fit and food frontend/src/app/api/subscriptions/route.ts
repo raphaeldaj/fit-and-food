@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { getEffectivePrice } from "@/lib/pricing";
 import { rateLimit, getClientIp } from "@/lib/rateLimit";
 import { encryptField } from "@/lib/security/crypto";
+import { logActivity } from "@/lib/security/activityLog";
 
 function nextDueDate(slot: "LUNDI" | "JEUDI") {
   const now = new Date();
@@ -53,8 +54,11 @@ export async function POST(req: NextRequest) {
     data: { subscriptionId: subscription.id, amount: pack ? getEffectivePrice(pack) : 0, status: "PENDING" },
   });
 
-  await db.adminLog.create({
-    data: { adminName: "Système", action: `Nouvelle souscription de ${user.fullName} — ${pack?.formule ?? ""} (${pack?.goal ?? ""})` },
+  await logActivity({
+    userId: user.id,
+    userName: user.fullName,
+    role: user.role,
+    action: `Nouvelle souscription — ${pack?.formule ?? ""} (${pack?.goal ?? ""})`,
   });
 
   return NextResponse.json({ subscriptionId: subscription.id, orderId: order.id }, { status: 201 });

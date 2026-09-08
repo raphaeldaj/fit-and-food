@@ -5,6 +5,7 @@ import { signAccessToken, signRefreshToken } from "@/lib/auth/jwt";
 import { db } from "@/lib/db";
 import { setAuthCookies } from "../../login/route";
 import { rateLimit, getClientIp } from "@/lib/rateLimit";
+import { logActivity } from "@/lib/security/activityLog";
 
 const MAX_2FA_ATTEMPTS = 5;
 const LOCK_MINUTES = 15;
@@ -33,12 +34,19 @@ export async function POST(req: NextRequest) {
     const valid = await verifyTwoFactorToken(token, user.twoFactorSecret);
     if (!valid) {
       const attempts = user.failed2FACount + 1;
+      const willLock = attempts >= MAX_2FA_ATTEMPTS;
       await db.user.update({
         where: { id: user.id },
         data: {
           failed2FACount: attempts,
-          locked2FAUntil: attempts >= MAX_2FA_ATTEMPTS ? new Date(Date.now() + LOCK_MINUTES * 60_000) : null,
+          locked2FAUntil: willLock ? new Date(Date.now() + LOCK_MINUTES * 60_000) : null,
         },
+      });
+      await logActivity({
+        userId: user.id,
+        userName: user.fullName,
+        role: user.role,
+        action: willLock ? "2FA verrouillée (trop d'échecs)" : "Code 2FA incorrect",
       });
       return NextResponse.json({ error: "Code incorrect." }, { status: 401 });
     }
@@ -48,7 +56,9 @@ export async function POST(req: NextRequest) {
     const accessToken = await signAccessToken(user.id, user.role);
     const refreshToken = await signRefreshToken(user.id);
 
-    const res = NextResponse.json({ success: true });
+    await logActivity({ userId: user.id, userName: user.fullName, role: user.role, action: "Connexion (2FA validée)" });
+
+    const res = NextResponse.json({ success: true, role: user.role });
     setAuthCookies(res, accessToken, refreshToken);
     return res;
   } catch (err) {

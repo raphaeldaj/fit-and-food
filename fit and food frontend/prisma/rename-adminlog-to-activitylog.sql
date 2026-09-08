@@ -1,0 +1,4 @@
+ALTER TABLE "AdminLog" RENAME TO "ActivityLog";
+ALTER TABLE "ActivityLog" RENAME COLUMN "adminName" TO "userName";
+ALTER TABLE "ActivityLog" ADD COLUMN IF NOT EXISTS "userId" TEXT;
+ALTER TABLE "ActivityLog" ADD COLUMN IF NOT EXISTS "role" TEXT;

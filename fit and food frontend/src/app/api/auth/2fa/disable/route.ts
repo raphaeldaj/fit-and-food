@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/session";
 import { db } from "@/lib/db";
+import { logActivity } from "@/lib/security/activityLog";
 
 export async function POST() {
   const user = await getCurrentUser();
@@ -10,5 +11,8 @@ export async function POST() {
     where: { id: user.id },
     data: { twoFactorEnabled: false, twoFactorSecret: null },
   });
+
+  await logActivity({ userId: user.id, userName: user.fullName, role: user.role, action: "Désactivation de la 2FA" });
+
   return NextResponse.json({ success: true });
 }

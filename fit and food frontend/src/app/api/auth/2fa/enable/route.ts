@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { verifyTwoFactorToken } from "@/lib/auth/twoFactor";
 import { twoFactorSchema } from "@/lib/validators/auth";
 import { db } from "@/lib/db";
+import { logActivity } from "@/lib/security/activityLog";
 
 export async function POST(req: NextRequest) {
   const user = await getCurrentUser();
@@ -20,5 +21,7 @@ export async function POST(req: NextRequest) {
   if (!valid) return NextResponse.json({ error: "Code incorrect." }, { status: 401 });
 
   await db.user.update({ where: { id: user.id }, data: { twoFactorEnabled: true } });
+  await logActivity({ userId: user.id, userName: user.fullName, role: user.role, action: "Activation de la 2FA" });
+
   return NextResponse.json({ success: true });
 }
