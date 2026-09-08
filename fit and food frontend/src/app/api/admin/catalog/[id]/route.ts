@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { Prisma } from "@/generated/prisma";
 import { requireAdmin } from "@/lib/auth/requireAdmin";
+import { logActivity } from "@/lib/security/activityLog";
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const { error } = await requireAdmin();
+  const { user, error } = await requireAdmin();
   if (error) return error;
 
   const { id } = await params;
@@ -29,12 +30,12 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     },
   });
 
-  await db.adminLog.create({ data: { adminName: "Admin", action: `Plat modifié : ${meal.name}` } });
+  await logActivity({ userId: user!.id, userName: user!.fullName, role: user!.role, action: `Plat modifié : ${meal.name}` });
   return NextResponse.json({ meal });
 }
 
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { error } = await requireAdmin();
+  const { user, error } = await requireAdmin();
   if (error) return error;
 
   const { id } = await params;
@@ -53,6 +54,6 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
     throw err;
   }
 
-  await db.adminLog.create({ data: { adminName: "Admin", action: `Plat supprimé : ${meal.name}` } });
+  await logActivity({ userId: user!.id, userName: user!.fullName, role: user!.role, action: `Plat supprimé : ${meal.name}` });
   return NextResponse.json({ success: true });
 }

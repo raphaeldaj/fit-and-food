@@ -6,6 +6,6 @@ export async function GET() {
   const { error } = await requireAdmin();
   if (error) return error;
 
-  const logs = await db.adminLog.findMany({ orderBy: { createdAt: "desc" }, take: 50 });
+  const logs = await db.activityLog.findMany({ orderBy: { createdAt: "desc" }, take: 100 });
   return NextResponse.json({ logs });
 }

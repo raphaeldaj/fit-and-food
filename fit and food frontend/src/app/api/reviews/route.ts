@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/session";
 import { db } from "@/lib/db";
+import { logActivity } from "@/lib/security/activityLog";
 
 export async function POST(req: NextRequest) {
   const user = await getCurrentUser();
@@ -19,9 +20,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Tu ne peux laisser un avis que sur un plat que tu as commandé." }, { status: 403 });
   }
 
+  const meal = await db.mealItem.findUnique({ where: { id: mealId } });
+
   const review = await db.review.create({
     data: { userId: user.id, mealId, rating, comment: comment || null },
   });
+
+  await logActivity({ userId: user.id, userName: user.fullName, role: user.role, action: `Avis laissé sur "${meal?.name ?? mealId}" (${rating}/5)` });
 
   return NextResponse.json({ review }, { status: 201 });
 }

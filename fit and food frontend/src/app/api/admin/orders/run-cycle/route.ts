@@ -2,9 +2,10 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getEffectivePrice } from "@/lib/pricing";
 import { requireAdmin } from "@/lib/auth/requireAdmin";
+import { logActivity } from "@/lib/security/activityLog";
 
 export async function POST() {
-  const { error } = await requireAdmin();
+  const { user, error } = await requireAdmin();
   if (error) return error;
 
   const now = new Date();
@@ -38,8 +39,11 @@ export async function POST() {
     created.push(order.id);
   }
 
-  await db.adminLog.create({
-    data: { adminName: "Système (cron)", action: `Cycle de reconduction : ${created.length} commande(s) générée(s)` },
+  await logActivity({
+    userId: user!.id,
+    userName: `${user!.fullName} (déclenché manuellement)`,
+    role: user!.role,
+    action: `Cycle de reconduction : ${created.length} commande(s) générée(s)`,
   });
 
   return NextResponse.json({ generated: created.length });

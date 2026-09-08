@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth/requireAdmin";
+import { logActivity } from "@/lib/security/activityLog";
 
 export async function GET() {
   const { error } = await requireAdmin();
@@ -11,7 +12,7 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const { error } = await requireAdmin();
+  const { user, error } = await requireAdmin();
   if (error) return error;
 
   const body = await req.json();
@@ -35,7 +36,7 @@ export async function POST(req: NextRequest) {
     },
   });
 
-  await db.adminLog.create({ data: { adminName: "Admin", action: `Nouveau plat ajouté : ${meal.name}` } });
+  await logActivity({ userId: user!.id, userName: user!.fullName, role: user!.role, action: `Nouveau plat ajouté : ${meal.name}` });
 
   return NextResponse.json({ meal }, { status: 201 });
 }
