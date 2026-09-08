@@ -8,6 +8,7 @@ type GymRecord = Prisma.GymGetPayload<Record<string, never>>;
 type MealRecord = Prisma.MealItemGetPayload<Record<string, never>>;
 
 async function main() {
+  // 1. Packs (6 formules figées)
   const packsData = [
     { goal: "PRISE_DE_MASSE" as const, formule: "DECOUVERTE" as const, mealsQty: 5, snackQty: 0, price: 23000 },
     { goal: "PRISE_DE_MASSE" as const, formule: "ESSENTIEL" as const, mealsQty: 5, snackQty: 5, price: 32000 },
@@ -27,6 +28,7 @@ async function main() {
     packs.push(pack);
   }
 
+  // 2. Salles partenaires
   const gymNames = [
     { name: "Dakar Fitness Club", address: "Mermoz, Dakar" },
     { name: "Iron Temple Gym", address: "Sacré-Coeur, Dakar" },
@@ -39,11 +41,13 @@ async function main() {
     gyms.push(gym);
   }
 
+  // 3. Catégories
   const categoryNames = ["Volaille", "Boeuf", "Poisson", "Végétal", "Protéiné"];
   for (const name of categoryNames) {
     await prisma.category.upsert({ where: { name }, update: {}, create: { name } });
   }
 
+  // 4. Repas & collations
   const mealsData = [
     { name: "Poulet grillé & riz complet", calories: 520, proteins: 42, type: "Repas", goal: "PRISE_DE_MASSE" as const, allergenTags: [] as string[], category: "Volaille" },
     { name: "Boeuf sauté aux légumes", calories: 480, proteins: 38, type: "Repas", goal: "PRISE_DE_MASSE" as const, allergenTags: [] as string[], category: "Boeuf" },
@@ -82,6 +86,7 @@ async function main() {
   const repasList = meals.filter((m) => m.type === "Repas");
   const collationList = meals.filter((m) => m.type === "Collation");
 
+  // 5. Comptes de test (clients + admin)
   const passwordHash = await bcrypt.hash("TestPass123!", 12);
   const adminPasswordHash = await bcrypt.hash("AdminPass123!", 12);
 
@@ -101,9 +106,10 @@ async function main() {
 
   const [fatou, moussa, aissatou] = users;
 
+  // 6. Abonnements + commandes + paiements + livraisons + avis (une seule fois par client)
   async function seedSubscriptionFor(
     user: typeof fatou,
-    pack: typeof packs[0],
+    pack: PackRecord,
     status: "ACTIVE" | "SUSPENDED",
     gymId: string | null
   ) {
@@ -158,12 +164,19 @@ async function main() {
   await seedSubscriptionFor(moussa, packs.find((p) => p.goal === "PERTE_DE_POIDS" && p.formule === "PERFORMANCE")!, "ACTIVE", gyms[1].id);
   await seedSubscriptionFor(aissatou, packs.find((p) => p.goal === "PERTE_DE_POIDS" && p.formule === "DECOUVERTE")!, "SUSPENDED", null);
 
+  // 7. Une promo active pour tester l'affichage
   await prisma.pack.update({
     where: { id: packs.find((p) => p.goal === "PRISE_DE_MASSE" && p.formule === "PERFORMANCE")!.id },
     data: { promoActive: true, promoPercent: 15 },
   });
 
-
+  // 8. Logs d'activité de test
+  await prisma.activityLog.createMany({
+    data: [
+      { userName: "Amina Ba", role: "ADMIN", action: "Compte de test initialisé via seed" },
+      { userName: "Système (cron)", action: "Cycle de reconduction simulé (données de seed)" },
+    ],
+  });
 
   console.log("✅ Données de test générées.");
   console.log("");
