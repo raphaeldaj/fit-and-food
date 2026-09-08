@@ -83,7 +83,7 @@ export default function PacksTab() {
                       onChange={(e) => setEditingPrice((prev) => ({ ...prev, [p.id]: e.target.value }))}
                       className="w-20 border border-border rounded p-1.5 text-sm"
                     />
-                    <button onClick={() => savePrice(p.id)} className="text-xs text-secondary underline">OK</button>
+                    <button onClick={() => savePrice(p.id)} className="text-xs text-secondary underline"></button>
                   </div>
                 </td>
                 <td className="py-2 pr-4">
@@ -96,7 +96,7 @@ export default function PacksTab() {
                       onChange={(e) => setEditingPromo((prev) => ({ ...prev, [p.id]: e.target.value }))}
                       className="w-16 border border-border rounded p-1.5 text-sm"
                     />
-                    <button onClick={() => savePromoPercent(p)} className="text-xs text-secondary underline">OK</button>
+                    <button onClick={() => savePromoPercent(p)} className="text-xs text-secondary underline"></button>
                   </div>
                 </td>
                 <td className="py-2 pr-4 font-semibold">
