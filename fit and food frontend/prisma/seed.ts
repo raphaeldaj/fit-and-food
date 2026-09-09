@@ -1,4 +1,4 @@
-import { PrismaClient, Prisma } from "../src/generated/prisma";
+import { PrismaClient, Prisma } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
@@ -94,7 +94,7 @@ async function main() {
     { fullName: "Fatou Ndiaye", email: "fatou.test@fitandfood.sn", phone: "771234501", role: "CLIENT" as const, passwordHash, gymId: gyms[0].id },
     { fullName: "Moussa Diop", email: "moussa.test@fitandfood.sn", phone: "771234502", role: "CLIENT" as const, passwordHash, gymId: gyms[1].id },
     { fullName: "Aissatou Fall", email: "aissatou.test@fitandfood.sn", phone: "771234503", role: "CLIENT" as const, passwordHash, gymId: null },
-    { fullName: "Amina Ba", email: "admin.test@fitandfood.sn", phone: "771234504", role: "ADMIN" as const, passwordHash: adminPasswordHash, gymId: null },
+    { fullName: "Fatima Ba", email: "admin.test@fitandfood.sn", phone: "771234504", role: "ADMIN" as const, passwordHash: adminPasswordHash, gymId: null },
   ];
 
   const users = [];
@@ -173,7 +173,7 @@ async function main() {
   // 8. Logs d'activité de test
   await prisma.activityLog.createMany({
     data: [
-      { userName: "Amina Ba", role: "ADMIN", action: "Compte de test initialisé via seed" },
+      { userName: "Fatima Ba", role: "ADMIN", action: "Compte de test initialisé via seed" },
       { userName: "Système (cron)", action: "Cycle de reconduction simulé (données de seed)" },
     ],
   });

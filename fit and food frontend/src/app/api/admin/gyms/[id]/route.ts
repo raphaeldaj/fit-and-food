@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { Prisma } from "@/generated/prisma";
+import { Prisma } from "@prisma/client";
 import { requireAdmin } from "@/lib/auth/requireAdmin";
 import { logActivity } from "@/lib/security/activityLog";
 
