@@ -34,7 +34,8 @@ export default async function MonEspacePage() {
   });
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-10">
+    // <div className="max-w-6xl mx-auto px-4 py-10">
+    <div className="max-w-6xl mx-auto px-4 py-10 min-w-0 w-full">
     <div className="flex justify-between items-start flex-wrap gap-2 mb-1">
         <h1 className="text-2xl font-heading text-secondary">Mon Espace Abonné</h1>
         <Link href="/mon-espace/parametres" className="border border-border text-text-dark text-xs font-semibold px-3.5 py-2 rounded-md">
@@ -68,7 +69,7 @@ export default async function MonEspacePage() {
         )}
       </div>
 
-      <div className="bg-white rounded-xl p-6 shadow-sm mb-6 overflow-x-auto">
+      <div className="bg-white rounded-xl p-6 shadow-sm mb-6 overflow-x-auto min-w-0">
         <h3 className="font-heading text-secondary mb-4">Historique des Commandes</h3>
         <table className="w-full text-sm">
           <thead>
@@ -92,7 +93,7 @@ export default async function MonEspacePage() {
         </table>
       </div>
 
-      <div className="bg-white rounded-xl p-6 shadow-sm mb-6 overflow-x-auto">
+      <div className="bg-white rounded-xl p-6 shadow-sm mb-6 overflow-x-auto min-w-0">
         <h3 className="font-heading text-secondary mb-4">Historique des Paiements</h3>
         <table className="w-full text-sm">
           <thead>
@@ -115,7 +116,7 @@ export default async function MonEspacePage() {
         </table>
       </div>
 
-      <div className="bg-white rounded-xl p-6 shadow-sm overflow-x-auto">
+      <div className="bg-white rounded-xl p-6 shadow-sm overflow-x-auto min-w-0">
         <h3 className="font-heading text-secondary mb-4">Repas Reçus &amp; Avis</h3>
 
         <ReviewForm />
