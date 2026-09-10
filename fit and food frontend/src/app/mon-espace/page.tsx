@@ -34,7 +34,6 @@ export default async function MonEspacePage() {
   });
 
   return (
-    // <div className="max-w-6xl mx-auto px-4 py-10">
     <div className="max-w-6xl mx-auto px-4 py-10 min-w-0 w-full">
     <div className="flex justify-between items-start flex-wrap gap-2 mb-1">
         <h1 className="text-2xl font-heading text-secondary">Mon Espace Abonné</h1>

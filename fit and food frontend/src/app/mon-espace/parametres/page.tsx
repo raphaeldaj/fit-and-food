@@ -8,7 +8,6 @@ export default async function ParametresPage() {
   if (!user) redirect("/connexion");
 
   return (
-    // <div className="max-w-6xl mx-auto px-4 py-10">
       <div className="max-w-6xl mx-auto px-4 py-10 min-w-0 w-full">
       <h1 className="text-2xl font-heading text-secondary mb-6">Paramètres du compte</h1>
       <ProfileForm initialFullName={user.fullName} initialPhone={user.phone} />

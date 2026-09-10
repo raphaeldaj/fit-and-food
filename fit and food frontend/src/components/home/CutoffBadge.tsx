@@ -6,7 +6,7 @@ export default function CutoffBadge() {
   const [text, setText] = useState("Calcul du prochain cutoff...");
 
   useEffect(() => {
-    const day = new Date().getDay(); // 0 = dimanche
+    const day = new Date().getDay();
     setText(
       day <= 5
         ? "Cutoff vendredi 23h59 pour la livraison de lundi"

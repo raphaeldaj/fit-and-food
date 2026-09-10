@@ -31,9 +31,7 @@ export default function AdminDashboard() {
 
       <AdminStats />
 
-      {/* <div className="bg-white rounded-xl p-6 shadow-sm mt-6"> */}
       <div className="bg-white rounded-xl p-6 shadow-sm mt-6 min-w-0 w-full">
-      {/* </div> */}
         <div className="flex gap-2 overflow-x-auto scrollbar-hide flex-nowrap snap-x snap-mandatory touch-pan-x -mx-1 px-1 mb-5">
           {TABS.map((tab) => (
             <button

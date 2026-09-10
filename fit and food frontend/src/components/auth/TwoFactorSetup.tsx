@@ -91,7 +91,6 @@ export default function TwoFactorSetup({ initiallyEnabled }: { initiallyEnabled:
             Scanne ce QR code avec ton application d'authentification, puis entre le code généré.
           </p>
           <div className="flex justify-center mb-4">
-            {/* Data URL : balise <img> classique, pas next/image */}
             <img src={qrCode} alt="QR code 2FA" width={180} height={180} />
           </div>
           <input
