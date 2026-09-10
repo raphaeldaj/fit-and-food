@@ -28,6 +28,7 @@ export default function AddGymForm({ onCreated, onCancel }: { onCreated: () => v
     }
     onCreated();
   };
+  
 
   return (
     <div className="bg-bg-light rounded-lg p-4 mb-4">
