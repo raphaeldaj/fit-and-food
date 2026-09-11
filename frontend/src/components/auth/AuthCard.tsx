@@ -76,7 +76,8 @@ export default function AuthCard({ initialMode = "login" }: { initialMode?: "log
 
   return (
     <div className={styles.loginWrapper}>
-      <div className={styles.loginCard}>
+      {/* <div className={styles.loginCard}> */}
+            <div className={`${styles.loginCard} ${isSignup ? styles.signupMode : ""}`}>
         <div className={`${styles.glowBlob} ${styles.blob1}`} />
         <div className={`${styles.glowBlob} ${styles.blob2}`} />
         <div className={styles.darkOverlay} />
@@ -85,7 +86,7 @@ export default function AuthCard({ initialMode = "login" }: { initialMode?: "log
           {!isSignup ? (
             <div className={styles.formView}>
               <div className={styles.header}>
-                <div className={styles.decorativeDot} />
+                
                 <div className={styles.title}>Content de te revoir</div>
                 <p className={styles.subtitle}>Connecte-toi pour gérer ton abonnement.</p>
               </div>
@@ -143,7 +144,7 @@ export default function AuthCard({ initialMode = "login" }: { initialMode?: "log
           ) : (
             <div className={styles.formView}>
               <div className={styles.header}>
-                <div className={styles.decorativeDot} />
+                
                 <div className={styles.title}>Créer un compte</div>
                 <p className={styles.subtitle}>Rejoins Fit &amp; Food en quelques secondes.</p>
               </div>

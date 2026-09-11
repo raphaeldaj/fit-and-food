@@ -36,8 +36,16 @@
     0 24px 48px rgba(0, 0, 0, 0.35),
     0 8px 16px rgba(0, 0, 0, 0.2);
   transition:
-    transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    transform 3s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 3s cubic-bezier(0.16, 1, 0.3, 1),
+    width 3s cubic-bezier(0.16, 1, 0.3, 1),
+    max-height 3s cubic-bezier(0.16, 1, 0.3, 1);
+  max-height: 480px;
+}
+
+.loginCard.signupMode {
+  width: 400px;
+  max-height: 720px;
 }
 
 .loginWrapper:hover .loginCard {

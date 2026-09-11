@@ -2,7 +2,7 @@ import AuthCard from "@/components/auth/AuthCard";
 
 export default function ConnexionPage() {
   return (
-    <div className="bg-secondary flex-1 flex flex-col items-center justify-start pt-16 pb-10 px-4">
+    <div className="bg-white flex-1 flex flex-col items-center justify-start pt-16 pb-10 px-4">
       <AuthCard initialMode="login" />
     </div>
   );
