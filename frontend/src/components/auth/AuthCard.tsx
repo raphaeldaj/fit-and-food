@@ -6,6 +6,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
 import { loginSchema, registerFormSchema } from "@/lib/validators/auth";
+import { IconEyeShow, IconEyeHide } from "@/components/icons";
+import PasswordStrengthMeter from "./PasswordStrengthMeter";
 import styles from "./AuthCard.module.css";
 
 type LoginData = z.infer<typeof loginSchema>;
@@ -20,6 +22,8 @@ export default function AuthCard({ initialMode = "login" }: { initialMode?: "log
   const router = useRouter();
   const [isSignup, setIsSignup] = useState(initialMode === "signup");
   const [gyms, setGyms] = useState<Gym[]>([]);
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [showSignupPassword, setShowSignupPassword] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
   const [registerError, setRegisterError] = useState<string | null>(null);
 
@@ -29,8 +33,9 @@ export default function AuthCard({ initialMode = "login" }: { initialMode?: "log
 
   const loginForm = useForm<LoginData>({ resolver: zodResolver(loginSchema) });
   const registerForm = useForm<RegisterData>({ resolver: zodResolver(registerFormSchema) });
+  const watchedPassword = registerForm.watch("password") ?? "";
 
-    const onLogin = async (data: LoginData) => {
+  const onLogin = async (data: LoginData) => {
     setLoginError(null);
     const res = await fetch("/api/auth/login", {
       method: "POST",
@@ -70,69 +75,180 @@ export default function AuthCard({ initialMode = "login" }: { initialMode?: "log
   };
 
   return (
-    <div className={styles.container}>
-      <div className={`${styles.form} ${isSignup ? styles.flipped : ""}`}>
-        <form className={styles.form_front} onSubmit={loginForm.handleSubmit(onLogin)}>
-          <div className={styles.form_details}>Connexion</div>
+    <div className={styles.loginWrapper}>
+      <div className={styles.loginCard}>
+        <div className={`${styles.glowBlob} ${styles.blob1}`} />
+        <div className={`${styles.glowBlob} ${styles.blob2}`} />
+        <div className={styles.darkOverlay} />
 
-          {loginError && <p className={styles.error}>{loginError}</p>}
+        <div className={styles.viewContainer}>
+          {!isSignup ? (
+            <div className={styles.formView}>
+              <div className={styles.header}>
+                <div className={styles.decorativeDot} />
+                <div className={styles.title}>Content de te revoir</div>
+                <p className={styles.subtitle}>Connecte-toi pour gérer ton abonnement.</p>
+              </div>
 
-          <input type="email" placeholder="Email" className={styles.input} {...loginForm.register("email")} />
-          {loginForm.formState.errors.email && <span className={styles.fieldError}>{loginForm.formState.errors.email.message}</span>}
+              {loginError && <div className={styles.formError}>{loginError}</div>}
 
-          <input type="password" placeholder="Mot de passe" className={styles.input} {...loginForm.register("password")} />
-          {loginForm.formState.errors.password && <span className={styles.fieldError}>{loginForm.formState.errors.password.message}</span>}
+              <form onSubmit={loginForm.handleSubmit(onLogin)}>
+                <div className={styles.inputGroup}>
+                  <input
+                    type="email"
+                    placeholder="Adresse email"
+                    autoComplete="email"
+                    className={styles.inputField}
+                    {...loginForm.register("email")}
+                  />
+                  {loginForm.formState.errors.email && (
+                    <span className={styles.fieldError}>{loginForm.formState.errors.email.message}</span>
+                  )}
+                </div>
 
-          <button type="submit" disabled={loginForm.formState.isSubmitting} className={styles.btn}>
-            {loginForm.formState.isSubmitting ? "Connexion..." : "Se connecter"}
-          </button>
+                <div className={styles.inputGroup}>
+                  <input
+                    type={showLoginPassword ? "text" : "password"}
+                    placeholder="Mot de passe"
+                    autoComplete="current-password"
+                    className={styles.inputField}
+                    style={{ paddingRight: 42 }}
+                    {...loginForm.register("password")}
+                  />
+                  <button
+                    type="button"
+                    className={styles.eyeToggle}
+                    onClick={() => setShowLoginPassword((v) => !v)}
+                    aria-label="Afficher le mot de passe"
+                  >
+                    {showLoginPassword ? <IconEyeHide size={16} /> : <IconEyeShow size={16} />}
+                  </button>
+                  {loginForm.formState.errors.password && (
+                    <span className={styles.fieldError}>{loginForm.formState.errors.password.message}</span>
+                  )}
+                </div>
 
-          <span className={styles.switch}>
-            Pas encore de compte ?{" "}
-            <button type="button" className={styles.signup_tog} onClick={() => setIsSignup(true)}>
-              Inscription
-            </button>
-          </span>
-        </form>
+                <button type="submit" className={styles.btnSubmit} disabled={loginForm.formState.isSubmitting}>
+                  {loginForm.formState.isSubmitting ? "Connexion..." : "Se connecter"}
+                </button>
+              </form>
 
-        <form className={styles.form_back} onSubmit={registerForm.handleSubmit(onRegister)}>
-          <div className={styles.form_details}>Inscription</div>
+              <div className={styles.signupPrompt}>
+                Pas encore de compte ?
+                <button type="button" className={styles.toggleLink} onClick={() => setIsSignup(true)}>
+                  Inscription
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className={styles.formView}>
+              <div className={styles.header}>
+                <div className={styles.decorativeDot} />
+                <div className={styles.title}>Créer un compte</div>
+                <p className={styles.subtitle}>Rejoins Fit &amp; Food en quelques secondes.</p>
+              </div>
 
-          {registerError && <p className={styles.error}>{registerError}</p>}
+              {registerError && <div className={styles.formError}>{registerError}</div>}
 
-          <input type="text" placeholder="Nom complet" className={styles.input} {...registerForm.register("fullName")} />
-          {registerForm.formState.errors.fullName && <span className={styles.fieldError}>{registerForm.formState.errors.fullName.message}</span>}
+              <form onSubmit={registerForm.handleSubmit(onRegister)}>
+                <div className={styles.inputGroup}>
+                  <input
+                    type="text"
+                    placeholder="Nom complet"
+                    autoComplete="name"
+                    className={styles.inputField}
+                    {...registerForm.register("fullName")}
+                  />
+                  {registerForm.formState.errors.fullName && (
+                    <span className={styles.fieldError}>{registerForm.formState.errors.fullName.message}</span>
+                  )}
+                </div>
 
-          <input type="email" placeholder="Email" className={styles.input} {...registerForm.register("email")} />
-          {registerForm.formState.errors.email && <span className={styles.fieldError}>{registerForm.formState.errors.email.message}</span>}
+                <div className={styles.inputGroup}>
+                  <input
+                    type="email"
+                    placeholder="Adresse email"
+                    autoComplete="email"
+                    className={styles.inputField}
+                    {...registerForm.register("email")}
+                  />
+                  {registerForm.formState.errors.email && (
+                    <span className={styles.fieldError}>{registerForm.formState.errors.email.message}</span>
+                  )}
+                </div>
 
-          <input type="text" placeholder="Téléphone (77 XXX XX XX)" className={styles.input} {...registerForm.register("phone")} />
-          {registerForm.formState.errors.phone && <span className={styles.fieldError}>{registerForm.formState.errors.phone.message}</span>}
+                <div className={styles.inputGroup}>
+                  <input
+                    type="text"
+                    placeholder="Téléphone (77 XXX XX XX)"
+                    autoComplete="tel"
+                    className={styles.inputField}
+                    {...registerForm.register("phone")}
+                  />
+                  {registerForm.formState.errors.phone && (
+                    <span className={styles.fieldError}>{registerForm.formState.errors.phone.message}</span>
+                  )}
+                </div>
 
-          <select className={styles.input} {...registerForm.register("gymId")}>
-            <option value="">Salle partenaire (optionnel)</option>
-            {gyms.map((g) => (
-              <option key={g.id} value={g.id}>{g.name}</option>
-            ))}
-          </select>
+                <div className={styles.inputGroup}>
+                  <select className={styles.inputField} defaultValue="" {...registerForm.register("gymId")}>
+                    <option value="">Salle partenaire (optionnel)</option>
+                    {gyms.map((g) => (
+                      <option key={g.id} value={g.id}>{g.name}</option>
+                    ))}
+                  </select>
+                </div>
 
-          <input type="password" placeholder="Mot de passe" className={styles.input} {...registerForm.register("password")} />
-          {registerForm.formState.errors.password && <span className={styles.fieldError}>{registerForm.formState.errors.password.message}</span>}
+                <div className={styles.inputGroup}>
+                  <input
+                    type={showSignupPassword ? "text" : "password"}
+                    placeholder="Mot de passe"
+                    autoComplete="new-password"
+                    className={styles.inputField}
+                    style={{ paddingRight: 42 }}
+                    {...registerForm.register("password")}
+                  />
+                  <button
+                    type="button"
+                    className={styles.eyeToggle}
+                    onClick={() => setShowSignupPassword((v) => !v)}
+                    aria-label="Afficher le mot de passe"
+                  >
+                    {showSignupPassword ? <IconEyeHide size={16} /> : <IconEyeShow size={16} />}
+                  </button>
+                  <PasswordStrengthMeter password={watchedPassword} />
+                  {registerForm.formState.errors.password && (
+                    <span className={styles.fieldError}>{registerForm.formState.errors.password.message}</span>
+                  )}
+                </div>
 
-          <input type="password" placeholder="Confirmer le mot de passe" className={styles.input} {...registerForm.register("confirmPassword")} />
-          {registerForm.formState.errors.confirmPassword && <span className={styles.fieldError}>{registerForm.formState.errors.confirmPassword.message}</span>}
+                <div className={styles.inputGroup}>
+                  <input
+                    type={showSignupPassword ? "text" : "password"}
+                    placeholder="Confirmer le mot de passe"
+                    autoComplete="new-password"
+                    className={styles.inputField}
+                    {...registerForm.register("confirmPassword")}
+                  />
+                  {registerForm.formState.errors.confirmPassword && (
+                    <span className={styles.fieldError}>{registerForm.formState.errors.confirmPassword.message}</span>
+                  )}
+                </div>
 
-          <button type="submit" disabled={registerForm.formState.isSubmitting} className={styles.btn}>
-            {registerForm.formState.isSubmitting ? "Création..." : "S'inscrire"}
-          </button>
+                <button type="submit" className={styles.btnSubmit} disabled={registerForm.formState.isSubmitting}>
+                  {registerForm.formState.isSubmitting ? "Création..." : "S'inscrire"}
+                </button>
+              </form>
 
-          <span className={styles.switch}>
-            Déjà un compte ?{" "}
-            <button type="button" className={styles.signup_tog} onClick={() => setIsSignup(false)}>
-              Connexion
-            </button>
-          </span>
-        </form>
+              <div className={styles.signupPrompt}>
+                Déjà un compte ?
+                <button type="button" className={styles.toggleLink} onClick={() => setIsSignup(false)}>
+                  Connexion
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
