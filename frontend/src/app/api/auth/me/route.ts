@@ -5,5 +5,15 @@ export async function GET() {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Non authentifié." }, { status: 401 });
 
-  return NextResponse.json({ user: { id: user.id, fullName: user.fullName, email: user.email, role: user.role } });
+  return NextResponse.json({
+    user: {
+      id: user.id,
+      fullName: user.fullName,
+      email: user.email,
+      phone: user.phone,
+      address: user.address,
+      gymId: user.gymId,
+      role: user.role,
+    },
+  });
 }

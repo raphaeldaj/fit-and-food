@@ -3,10 +3,17 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-export default function ProfileForm({ initialFullName, initialPhone }: { initialFullName: string; initialPhone: string }) {
+interface Props {
+  initialFullName: string;
+  initialPhone: string;
+  initialAddress: string;
+}
+
+export default function ProfileForm({ initialFullName, initialPhone, initialAddress }: Props) {
   const router = useRouter();
   const [fullName, setFullName] = useState(initialFullName);
   const [phone, setPhone] = useState(initialPhone);
+  const [address, setAddress] = useState(initialAddress);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -18,7 +25,7 @@ export default function ProfileForm({ initialFullName, initialPhone }: { initial
     const res = await fetch("/api/profile", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ fullName, phone }),
+      body: JSON.stringify({ fullName, phone, address }),
     });
     const json = await res.json();
     setLoading(false);
@@ -41,9 +48,18 @@ export default function ProfileForm({ initialFullName, initialPhone }: { initial
         <label className="block text-xs font-semibold mb-1">Nom complet</label>
         <input value={fullName} onChange={(e) => setFullName(e.target.value)} className="w-full border border-border rounded-md p-2 text-sm" />
       </div>
-      <div className="mb-4">
+      <div className="mb-3">
         <label className="block text-xs font-semibold mb-1">Téléphone</label>
         <input value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full border border-border rounded-md p-2 text-sm" />
+      </div>
+      <div className="mb-4">
+        <label className="block text-xs font-semibold mb-1">Adresse de livraison par défaut</label>
+        <input
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
+          placeholder="ex: Mermoz, Rue MZ 12, Appt B3"
+          className="w-full border border-border rounded-md p-2 text-sm"
+        />
       </div>
 
       <button onClick={save} disabled={loading} className="bg-primary text-white text-xs font-semibold px-4 py-2 rounded-md disabled:opacity-50">

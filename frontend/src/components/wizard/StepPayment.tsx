@@ -24,9 +24,22 @@ export default function StepPayment({ pack, mixedGoal, selectedMeals, onBack }: 
   const [paymentMethod, setPaymentMethod] = useState<"WAVE" | "ORANGE_MONEY">("WAVE");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [prefilled, setPrefilled] = useState(false);
 
   useEffect(() => {
     fetch("/api/gyms").then((res) => res.json()).then((data) => setGyms(data.gyms ?? []));
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!data?.user) return;
+        if (data.user.phone) setPhone(data.user.phone);
+        if (data.user.address) setAddress(data.user.address);
+        if (data.user.gymId) setGymId(data.user.gymId);
+        setPrefilled(true);
+      });
   }, []);
 
   const cutoffWarning =
@@ -72,6 +85,12 @@ export default function StepPayment({ pack, mixedGoal, selectedMeals, onBack }: 
       </div>
 
       {error && <p className="bg-danger/10 text-danger text-sm rounded-md p-3 mb-4">{error}</p>}
+
+      {prefilled && (address || phone) && (
+        <p className="text-xs text-text-muted bg-bg-light rounded-md p-2.5 mb-4">
+          Tes coordonnées ont été préremplies depuis ton profil — modifie-les librement si besoin pour cet abonnement.
+        </p>
+      )}
 
       <div className="grid md:grid-cols-2 gap-6">
         <div>
