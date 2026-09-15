@@ -15,6 +15,20 @@ export function encryptField(text: string): string {
   return Buffer.concat([iv, authTag, encrypted]).toString("base64");
 }
 
+/**
+ * Chiffrement déterministe : même valeur en clair -> même valeur chiffrée.
+ * Réservé aux champs qui doivent rester recherchables par égalité exacte
+ * (email pour la connexion, téléphone pour la détection de doublon).
+ * Compromis assumé : révèle l'égalité entre deux valeurs, sans révéler la valeur elle-même.
+ */
+export function encryptFieldDeterministic(text: string): string {
+  const iv = crypto.createHmac("sha256", KEY).update(text).digest().subarray(0, 12);
+  const cipher = crypto.createCipheriv(ALGO, KEY, iv);
+  const encrypted = Buffer.concat([cipher.update(text, "utf8"), cipher.final()]);
+  const authTag = cipher.getAuthTag();
+  return Buffer.concat([iv, authTag, encrypted]).toString("base64");
+}
+
 export function decryptField(payload: string): string {
   try {
     const data = Buffer.from(payload, "base64");
@@ -25,7 +39,6 @@ export function decryptField(payload: string): string {
     decipher.setAuthTag(authTag);
     return Buffer.concat([decipher.update(encrypted), decipher.final()]).toString("utf8");
   } catch {
-    // Donnée créée avant l'activation du chiffrement — retournée telle quelle plutôt que de planter.
     return payload;
   }
 }

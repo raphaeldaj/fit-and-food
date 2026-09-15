@@ -4,6 +4,7 @@ import { hashPassword } from "@/lib/auth/password";
 import { db } from "@/lib/db";
 import { rateLimit, getClientIp } from "@/lib/rateLimit";
 import { logActivity } from "@/lib/security/activityLog";
+import { encryptField, encryptFieldDeterministic } from "@/lib/security/crypto";
 
 export async function POST(req: NextRequest) {
   try {
@@ -21,8 +22,10 @@ export async function POST(req: NextRequest) {
     }
 
     const { fullName, email, phone, password, gymId } = parsed.data;
+    const encEmail = encryptFieldDeterministic(email);
+    const encPhone = encryptFieldDeterministic(phone);
 
-    const existing = await db.user.findFirst({ where: { OR: [{ email }, { phone }] } });
+    const existing = await db.user.findFirst({ where: { OR: [{ email: encEmail }, { phone: encPhone }] } });
     if (existing) {
       return NextResponse.json({ error: "Email ou téléphone déjà utilisé." }, { status: 409 });
     }
@@ -30,12 +33,18 @@ export async function POST(req: NextRequest) {
     const passwordHash = await hashPassword(password);
 
     const user = await db.user.create({
-      data: { fullName, email, phone, passwordHash, gymId: gymId || null },
+      data: {
+        fullName: encryptField(fullName),
+        email: encEmail,
+        phone: encPhone,
+        passwordHash,
+        gymId: gymId || null,
+      },
     });
 
-    await logActivity({ userId: user.id, userName: user.fullName, role: "CLIENT", action: "Inscription" });
+    await logActivity({ userId: user.id, userName: fullName, role: "CLIENT", action: "Inscription" });
 
-    return NextResponse.json({ id: user.id, email: user.email }, { status: 201 });
+    return NextResponse.json({ id: user.id, email }, { status: 201 });
   } catch (err) {
     console.error("Erreur /api/auth/register :", err);
     return NextResponse.json({ error: "Erreur serveur, réessaie." }, { status: 500 });

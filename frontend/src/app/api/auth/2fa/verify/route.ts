@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { setAuthCookies } from "../../login/route";
 import { rateLimit, getClientIp } from "@/lib/rateLimit";
 import { logActivity } from "@/lib/security/activityLog";
+import { decryptField } from "@/lib/security/crypto";
 
 const MAX_2FA_ATTEMPTS = 5;
 const LOCK_MINUTES = 15;
@@ -27,6 +28,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "2FA non configurée." }, { status: 400 });
     }
 
+    const fullName = decryptField(user.fullName);
+
     if (user.locked2FAUntil && user.locked2FAUntil > new Date()) {
       return NextResponse.json({ error: "Trop de tentatives. Réessaie dans quelques minutes." }, { status: 423 });
     }
@@ -44,7 +47,7 @@ export async function POST(req: NextRequest) {
       });
       await logActivity({
         userId: user.id,
-        userName: user.fullName,
+        userName: fullName,
         role: user.role,
         action: willLock ? "2FA verrouillée (trop d'échecs)" : "Code 2FA incorrect",
       });
@@ -56,7 +59,7 @@ export async function POST(req: NextRequest) {
     const accessToken = await signAccessToken(user.id, user.role);
     const refreshToken = await signRefreshToken(user.id);
 
-    await logActivity({ userId: user.id, userName: user.fullName, role: user.role, action: "Connexion (2FA validée)" });
+    await logActivity({ userId: user.id, userName: fullName, role: user.role, action: "Connexion (2FA validée)" });
 
     const res = NextResponse.json({ success: true, role: user.role });
     setAuthCookies(res, accessToken, refreshToken);

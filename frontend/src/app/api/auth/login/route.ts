@@ -5,6 +5,7 @@ import { signAccessToken, signRefreshToken } from "@/lib/auth/jwt";
 import { db } from "@/lib/db";
 import { rateLimit, getClientIp } from "@/lib/rateLimit";
 import { logActivity } from "@/lib/security/activityLog";
+import { encryptFieldDeterministic, decryptField } from "@/lib/security/crypto";
 
 const MAX_ATTEMPTS = 5;
 const LOCK_MINUTES = 15;
@@ -24,15 +25,17 @@ export async function POST(req: NextRequest) {
     }
 
     const { email, password } = parsed.data;
-    const user = await db.user.findUnique({ where: { email } });
+    const user = await db.user.findUnique({ where: { email: encryptFieldDeterministic(email) } });
 
     if (!user) {
       await logActivity({ userName: email, action: "Tentative de connexion échouée (compte inconnu)" });
       return NextResponse.json({ error: "Identifiants incorrects." }, { status: 401 });
     }
 
+    const fullName = decryptField(user.fullName);
+
     if (user.lockedUntil && user.lockedUntil > new Date()) {
-      await logActivity({ userId: user.id, userName: user.fullName, role: user.role, action: "Connexion refusée (compte verrouillé)" });
+      await logActivity({ userId: user.id, userName: fullName, role: user.role, action: "Connexion refusée (compte verrouillé)" });
       return NextResponse.json({ error: "Compte temporairement verrouillé." }, { status: 423 });
     }
 
@@ -49,7 +52,7 @@ export async function POST(req: NextRequest) {
       });
       await logActivity({
         userId: user.id,
-        userName: user.fullName,
+        userName: fullName,
         role: user.role,
         action: willLock ? "Compte verrouillé (trop d'échecs de connexion)" : "Tentative de connexion échouée (mot de passe incorrect)",
       });
@@ -65,7 +68,7 @@ export async function POST(req: NextRequest) {
     const accessToken = await signAccessToken(user.id, user.role);
     const refreshToken = await signRefreshToken(user.id);
 
-    await logActivity({ userId: user.id, userName: user.fullName, role: user.role, action: "Connexion" });
+    await logActivity({ userId: user.id, userName: fullName, role: user.role, action: "Connexion" });
 
     const res = NextResponse.json({ success: true, role: user.role });
     setAuthCookies(res, accessToken, refreshToken);
