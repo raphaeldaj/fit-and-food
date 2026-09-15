@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth/requireAdmin";
+import { decryptField } from "@/lib/security/crypto";
 
 export async function GET() {
   const { error } = await requireAdmin();
@@ -14,7 +15,7 @@ export async function GET() {
   return NextResponse.json({
     subscriptions: subs.map((s) => ({
       id: s.id,
-      client: s.user.fullName,
+      client: decryptField(s.user.fullName),
       formule: `${s.pack.formule} (${s.pack.goal})`,
       slot: s.slot,
       gym: s.gym?.name ?? "-",

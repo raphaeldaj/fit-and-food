@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth/requireAdmin";
+import { decryptField } from "@/lib/security/crypto";
 
 export async function GET() {
   const { error } = await requireAdmin();
@@ -12,6 +13,12 @@ export async function GET() {
   });
 
   return NextResponse.json({
-    deliveries: deliveries.map((d) => ({ id: d.id, slot: d.slot, date: d.date, client: d.order.subscription.user.fullName, status: d.status })),
+    deliveries: deliveries.map((d) => ({
+      id: d.id,
+      slot: d.slot,
+      date: d.date,
+      client: decryptField(d.order.subscription.user.fullName),
+      status: d.status,
+    })),
   });
 }
