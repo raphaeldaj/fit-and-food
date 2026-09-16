@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { encryptField, encryptFieldDeterministic } from "@/lib/security/crypto";
 
 export async function logActivity(params: {
   userId?: string | null;
@@ -9,8 +10,8 @@ export async function logActivity(params: {
   try {
     await db.activityLog.create({
       data: {
-        userId: params.userId ?? null,
-        userName: params.userName,
+        userIdEnc: params.userId ? encryptFieldDeterministic(params.userId) : null,
+        userName: encryptField(params.userName),
         role: params.role ?? null,
         action: params.action,
       },

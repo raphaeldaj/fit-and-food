@@ -196,7 +196,7 @@ model Review {
 
 model ActivityLog {
   id        String   @id @default(cuid())
-  userId    String?
+  userIdEnc String?
   userName  String
   role      String?
   action    String
