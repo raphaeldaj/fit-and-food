@@ -165,13 +165,17 @@ model Order {
 }
 
 model Payment {
-  id        String        @id @default(cuid())
-  orderId   String        @unique
-  order     Order         @relation(fields: [orderId], references: [id])
-  method    PaymentMethod
-  status    PaymentStatus @default(PENDING)
-  reference String?
-  createdAt DateTime      @default(now())
+  id           String        @id @default(cuid())
+  orderId      String        @unique
+  order        Order         @relation(fields: [orderId], references: [id])
+  method       PaymentMethod
+  status       PaymentStatus @default(PENDING)
+  reference    String?
+  token        String?
+  internalId   String?
+  operator     String?
+  failedReason String?
+  createdAt    DateTime      @default(now())
 }
 
 model Delivery {

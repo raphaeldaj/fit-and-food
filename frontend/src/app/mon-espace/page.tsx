@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import DashboardActions from "@/components/dashboard/DashboardActions";
@@ -6,9 +7,12 @@ import EditDeliveryInfo from "@/components/dashboard/EditDeliveryInfo";
 import ReviewForm from "@/components/dashboard/ReviewForm";
 import { IconStar } from "@/components/icons";
 import { decryptField } from "@/lib/security/crypto";
-import Link from "next/link";
 
-const STATUS_LABELS: Record<string, string> = { ACTIVE: "Actif", SUSPENDED: "Suspendu", CANCELLED: "Annulé" };
+const STATUS_LABELS: Record<string, string> = {
+  ACTIVE: "Actif",
+  SUSPENDED: "Suspendu",
+  CANCELLED: "Annulé",
+};
 
 export default async function MonEspacePage() {
   const user = await getCurrentUser();
@@ -24,7 +28,9 @@ export default async function MonEspacePage() {
   const gyms = gymIds.length ? await db.gym.findMany({ where: { id: { in: gymIds } } }) : [];
   const gymMap = new Map(gyms.map((g) => [g.id, g.name]));
 
-  const allOrders = subscriptions.flatMap((s) => s.orders.map((o) => ({ ...o, formule: s.pack.formule })));
+  const allOrders = subscriptions.flatMap((s) =>
+    s.orders.map((o) => ({ ...o, formule: s.pack.formule }))
+  );
 
   const reviews = await db.review.findMany({
     where: { userId: user.id },
@@ -35,35 +41,42 @@ export default async function MonEspacePage() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-10 min-w-0 w-full">
-    <div className="flex justify-between items-start flex-wrap gap-2 mb-1">
+      <div className="flex justify-between items-start flex-wrap gap-2 mb-1">
         <h1 className="text-2xl font-heading text-secondary">Mon Espace Abonné</h1>
-        <Link href="/mon-espace/parametres" className="border border-border text-text-dark text-xs font-semibold px-3.5 py-2 rounded-md">
+        <Link
+          href="/mon-espace/parametres"
+          className="border border-border text-text-dark text-xs font-semibold px-3.5 py-2 rounded-md"
+        >
           Paramètres du compte
         </Link>
-    </div>
-      <p className="text-text-muted text-sm mb-8">Gérez vos abonnements, vos livraisons, paiements et avis</p>
+      </div>
+      <p className="text-text-muted text-sm mb-8">
+        Gérez vos abonnements, vos livraisons, paiements et avis
+      </p>
 
       <h3 className="font-heading text-secondary mb-3">Mes Abonnements</h3>
-      <div className="grid md:grid-cols-2 gap-6 mb-8">
-        {subscriptions.length ? subscriptions.map((sub) => {
-          const address = decryptField(sub.address);
-          const phone = decryptField(sub.phone);
-          return (
-            <div key={sub.id} className="bg-white rounded-xl p-6 shadow-sm">
-              <dl className="space-y-1.5 text-sm">
-                <Row label="Formule" value={`${sub.pack.formule} — ${sub.pack.goal.replace("_", " ")}`} />
-                <Row label="Statut" value={STATUS_LABELS[sub.status]} />
-                <Row label="Créneau Livraison" value={sub.slot} />
-                <Row label="Salle Partenaire" value={sub.gymId ? gymMap.get(sub.gymId) ?? "-" : "-"} />
-                <Row label="Adresse" value={address} />
-                <Row label="Téléphone" value={phone} />
-                <Row label="Prochaine Échéance" value={sub.nextDueDate.toLocaleDateString("fr-FR")} />
-              </dl>
-              <EditDeliveryInfo subscriptionId={sub.id} initialAddress={address} initialPhone={phone} />
-              <DashboardActions subscriptionId={sub.id} status={sub.status} />
-            </div>
-          );
-        }) : (
+      <div className="grid md:grid-cols-2 gap-6 mb-8 min-w-0">
+        {subscriptions.length ? (
+          subscriptions.map((sub) => {
+            const address = decryptField(sub.address);
+            const phone = decryptField(sub.phone);
+            return (
+              <div key={sub.id} className="bg-white rounded-xl p-6 shadow-sm min-w-0">
+                <dl className="space-y-1.5 text-sm">
+                  <Row label="Formule" value={`${sub.pack.formule} — ${sub.pack.goal.replace("_", " ")}`} />
+                  <Row label="Statut" value={STATUS_LABELS[sub.status]} />
+                  <Row label="Créneau Livraison" value={sub.slot} />
+                  <Row label="Salle Partenaire" value={sub.gymId ? gymMap.get(sub.gymId) ?? "-" : "-"} />
+                  <Row label="Adresse" value={address} />
+                  <Row label="Téléphone" value={phone} />
+                  <Row label="Prochaine Échéance" value={sub.nextDueDate.toLocaleDateString("fr-FR")} />
+                </dl>
+                <EditDeliveryInfo subscriptionId={sub.id} initialAddress={address} initialPhone={phone} />
+                <DashboardActions subscriptionId={sub.id} status={sub.status} />
+              </div>
+            );
+          })
+        ) : (
           <p className="text-text-muted text-sm">Aucun abonnement pour l&apos;instant.</p>
         )}
       </div>
@@ -73,20 +86,36 @@ export default async function MonEspacePage() {
         <table className="w-full text-sm">
           <thead>
             <tr className="text-left text-text-muted text-xs">
-              <th className="pb-2">Commande</th><th className="pb-2">Abonnement</th><th className="pb-2">Cycle</th><th className="pb-2">Montant</th><th className="pb-2">Statut</th>
+              <th className="pb-2">Commande</th>
+              <th className="pb-2">Abonnement</th>
+              <th className="pb-2">Cycle</th>
+              <th className="pb-2">Montant</th>
+              <th className="pb-2">Statut</th>
             </tr>
           </thead>
           <tbody>
-            {allOrders.length ? allOrders.map((o) => (
-              <tr key={o.id} className="border-t border-border">
-                <td className="py-2">#{o.id.slice(0, 6)}</td>
-                <td className="py-2">{o.formule}</td>
-                <td className="py-2">{o.cycleDate.toLocaleDateString("fr-FR")}</td>
-                <td className="py-2">{o.amount.toLocaleString("fr-FR")} F</td>
-                <td className="py-2">{o.status}</td>
+            {allOrders.length ? (
+              allOrders.map((o) => (
+                <tr key={o.id} className="border-t border-border">
+                  <td className="py-2">#{o.id.slice(0, 6)}</td>
+                  <td className="py-2">{o.formule}</td>
+                  <td className="py-2">{o.cycleDate.toLocaleDateString("fr-FR")}</td>
+                  <td className="py-2">{o.amount.toLocaleString("fr-FR")} F</td>
+                  <td className="py-2">
+                    {o.status === "PENDING" ? (
+                      <Link href={`/paiement/${o.id}`} className="text-primary underline font-semibold">
+                        Payer maintenant
+                      </Link>
+                    ) : (
+                      o.status
+                    )}
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={5} className="text-text-muted py-3">Aucune commande</td>
               </tr>
-            )) : (
-              <tr><td colSpan={5} className="text-text-muted py-3">Aucune commande</td></tr>
             )}
           </tbody>
         </table>
@@ -97,19 +126,28 @@ export default async function MonEspacePage() {
         <table className="w-full text-sm">
           <thead>
             <tr className="text-left text-text-muted text-xs">
-              <th className="pb-2">Paiement</th><th className="pb-2">Méthode</th><th className="pb-2">Commande liée</th><th className="pb-2">Statut</th>
+              <th className="pb-2">Paiement</th>
+              <th className="pb-2">Méthode</th>
+              <th className="pb-2">Commande liée</th>
+              <th className="pb-2">Statut</th>
             </tr>
           </thead>
           <tbody>
-            {allOrders.filter((o) => o.payment).length ? allOrders.filter((o) => o.payment).map((o) => (
-              <tr key={o.payment!.id} className="border-t border-border">
-                <td className="py-2">#{o.payment!.id.slice(0, 6)}</td>
-                <td className="py-2">{o.payment!.method}</td>
-                <td className="py-2">#{o.id.slice(0, 6)}</td>
-                <td className="py-2">{o.payment!.status}</td>
+            {allOrders.filter((o) => o.payment).length ? (
+              allOrders
+                .filter((o) => o.payment)
+                .map((o) => (
+                  <tr key={o.payment!.id} className="border-t border-border">
+                    <td className="py-2">#{o.payment!.id.slice(0, 6)}</td>
+                    <td className="py-2">{o.payment!.method}</td>
+                    <td className="py-2">#{o.id.slice(0, 6)}</td>
+                    <td className="py-2">{o.payment!.status}</td>
+                  </tr>
+                ))
+            ) : (
+              <tr>
+                <td colSpan={4} className="text-text-muted py-3">Aucun paiement</td>
               </tr>
-            )) : (
-              <tr><td colSpan={4} className="text-text-muted py-3">Aucun paiement</td></tr>
             )}
           </tbody>
         </table>
@@ -123,22 +161,34 @@ export default async function MonEspacePage() {
         <table className="w-full text-sm">
           <thead>
             <tr className="text-left text-text-muted text-xs">
-              <th className="pb-2">Repas</th><th className="pb-2">Date</th><th className="pb-2">Note</th>
+              <th className="pb-2">Repas</th>
+              <th className="pb-2">Date</th>
+              <th className="pb-2">Note</th>
             </tr>
           </thead>
           <tbody>
-            {reviews.length ? reviews.map((r) => (
-              <tr key={r.id} className="border-t border-border">
-                <td className="py-2">{r.meal.name}</td>
-                <td className="py-2">{r.createdAt.toLocaleDateString("fr-FR")}</td>
-                <td className="py-2 flex items-center gap-0.5">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <IconStar key={i} size={14} className={i < r.rating ? "fill-primary text-primary" : "text-border"} />
-                  ))}
-                </td>
+            {reviews.length ? (
+              reviews.map((r) => (
+                <tr key={r.id} className="border-t border-border">
+                  <td className="py-2">{r.meal.name}</td>
+                  <td className="py-2">{r.createdAt.toLocaleDateString("fr-FR")}</td>
+                  <td className="py-2">
+                    <div className="flex items-center gap-0.5">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <IconStar
+                          key={i}
+                          size={14}
+                          className={i < r.rating ? "fill-primary text-primary" : "text-border"}
+                        />
+                      ))}
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={3} className="text-text-muted py-3">Aucun avis</td>
               </tr>
-            )) : (
-              <tr><td colSpan={3} className="text-text-muted py-3">Aucun avis</td></tr>
             )}
           </tbody>
         </table>
@@ -151,7 +201,7 @@ function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex justify-between gap-3">
       <dt className="font-semibold">{label} :</dt>
-      <dd className="text-text-muted text-right">{value}</dd>
+      <dd className="text-text-muted text-right break-words min-w-0">{value}</dd>
     </div>
   );
 }

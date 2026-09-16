@@ -47,36 +47,70 @@ export default function StepPayment({ pack, mixedGoal, selectedMeals, onBack }: 
       ? "Cutoff : vendredi 23h59. Après ce délai, la souscription est reportée au lundi suivant."
       : "Cutoff : mardi 23h59. Après ce délai, la souscription est reportée au jeudi suivant.";
 
-  const submit = async () => {
-    setError(null);
-    if (!address || !phone) {
-      setError("Merci de renseigner l'adresse et le téléphone.");
-      return;
-    }
-    setLoading(true);
-    const res = await fetch("/api/subscriptions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        packId: pack.id,
-        mixedGoal,
-        slot,
-        paymentMethod,
-        address,
-        phone,
-        gymId: gymId || null,
-        items: selectedMeals.map((m) => ({ mealId: m.mealId, quantity: m.quantity })),
-      }),
-    });
-    const json = await res.json();
-    setLoading(false);
 
-    if (!res.ok) {
-      setError(json.error ?? "Erreur lors de la souscription.");
-      return;
-    }
-    router.push("/mon-espace");
-  };
+
+
+    const submit = async () => {
+      setError(null);
+      if (!address || !phone) {
+        setError("Merci de renseigner l'adresse et le téléphone.");
+        return;
+      }
+      setLoading(true);
+      const res = await fetch("/api/subscriptions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          packId: pack.id,
+          mixedGoal,
+          slot,
+          paymentMethod,
+          address,
+          phone,
+          gymId: gymId || null,
+          items: selectedMeals.map((m) => ({ mealId: m.mealId, quantity: m.quantity })),
+        }),
+      });
+      const json = await res.json();
+      setLoading(false);
+
+      if (!res.ok) {
+        setError(json.error ?? "Erreur lors de la souscription.");
+        return;
+      }
+      router.push(`/paiement/${json.orderId}`);
+    };
+
+  // const submit = async () => {
+  //   setError(null);
+  //   if (!address || !phone) {
+  //     setError("Merci de renseigner l'adresse et le téléphone.");
+  //     return;
+  //   }
+  //   setLoading(true);
+  //   const res = await fetch("/api/subscriptions", {
+  //     method: "POST",
+  //     headers: { "Content-Type": "application/json" },
+  //     body: JSON.stringify({
+  //       packId: pack.id,
+  //       mixedGoal,
+  //       slot,
+  //       paymentMethod,
+  //       address,
+  //       phone,
+  //       gymId: gymId || null,
+  //       items: selectedMeals.map((m) => ({ mealId: m.mealId, quantity: m.quantity })),
+  //     }),
+  //   });
+  //   const json = await res.json();
+  //   setLoading(false);
+
+  //   if (!res.ok) {
+  //     setError(json.error ?? "Erreur lors de la souscription.");
+  //     return;
+  //   }
+  //   router.push("/mon-espace");
+  // };
 
   return (
     <div className="bg-white rounded-xl p-6 shadow-sm mb-6">

@@ -17,33 +17,28 @@ export async function POST() {
   const created: string[] = [];
 
   for (const sub of dueSubscriptions) {
-    const order = await db.order.create({ data: { subscriptionId: sub.id, amount: getEffectivePrice(sub.pack), status: "PENDING" } });
+    // Évite de recréer une commande si le cycle en cours n'est pas encore réglé
+    const pending = await db.order.findFirst({
+      where: { subscriptionId: sub.id, status: "PENDING" },
+    });
+    if (pending) continue;
 
-    const success = Math.random() > 0.15;
-    await db.payment.create({ data: { orderId: order.id, method: sub.paymentMethod, status: success ? "SUCCESS" : "FAILED" } });
-    await db.order.update({ where: { id: order.id }, data: { status: success ? "PAID" : "FAILED" } });
+    const order = await db.order.create({
+      data: { subscriptionId: sub.id, amount: getEffectivePrice(sub.pack), status: "PENDING" },
+    });
 
     const nextDate = new Date(sub.nextDueDate);
     nextDate.setDate(nextDate.getDate() + 7);
-    const newFailedCycles = success ? 0 : sub.failedCycles + 1;
-
-    await db.subscription.update({
-      where: { id: sub.id },
-      data: {
-        nextDueDate: nextDate,
-        failedCycles: newFailedCycles,
-        status: !success && newFailedCycles >= 3 ? "SUSPENDED" : "ACTIVE",
-      },
-    });
+    await db.subscription.update({ where: { id: sub.id }, data: { nextDueDate: nextDate } });
 
     created.push(order.id);
   }
 
   await logActivity({
     userId: user!.id,
-    userName: `${user!.fullName} (déclenché manuellement)`,
+    userName: user!.fullName,
     role: user!.role,
-    action: `Cycle de reconduction : ${created.length} commande(s) générée(s)`,
+    action: `Cycle de reconduction : ${created.length} commande(s) à régler générée(s)`,
   });
 
   return NextResponse.json({ generated: created.length });
