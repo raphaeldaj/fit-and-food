@@ -35,6 +35,49 @@ export interface StatusResult {
   creditedAmount: number;
 }
 
+// export async function initiatePayment(params: {
+//   amount: number;
+//   operator: "wave" | "orange";
+//   customerPhone: string;
+//   customerName?: string;
+//   orderId: string;
+//   otpCode?: string;
+// }): Promise<InitiateResult> {
+//   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+
+//   const body = {
+//     amount: params.amount,
+//     currency: "XOF",
+//     country_code: "SN",
+//     operator: params.operator,
+//     customer_phone: params.customerPhone,
+//     customer_name: params.customerName,
+//     order_id: params.orderId,
+//     otp_code: params.otpCode,
+//     return_url: `${appUrl}/paiement/retour?order=${params.orderId}`,
+//     cancel_url: `${appUrl}/paiement/annule?order=${params.orderId}`,
+//     webhook_url: `${appUrl}/api/webhooks/senepay`,
+//     metadata: { orderId: params.orderId },
+//   };
+
+//   const res = await fetch(`${BASE_URL}/api/v1/payments/initiate`, {
+//     method: "POST",
+//     headers: headers(),
+//     body: JSON.stringify(body),
+//   });
+
+//   const data = await res.json();
+
+//   if (!res.ok) {
+//     console.error("Erreur SenePay initiate :", { status: res.status, sent: body, received: data });
+//     const message = data?.message ?? data?.error ?? "Erreur lors de l'initiation du paiement.";
+//     const code = data?.code ?? res.status;
+//     throw new Error(`[SenePay ${code}] ${message}`);
+//   }
+
+//   return data as InitiateResult;
+// }
+
 export async function initiatePayment(params: {
   amount: number;
   operator: "wave" | "orange";
@@ -43,7 +86,7 @@ export async function initiatePayment(params: {
   orderId: string;
   otpCode?: string;
 }): Promise<InitiateResult> {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000").replace(/\/+$/, "");
 
   const body = {
     amount: params.amount,
