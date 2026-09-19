@@ -7,13 +7,15 @@ export async function POST(req: NextRequest) {
   const rawBody = await req.text();
   const signature = req.headers.get("x-senepay-signature");
 
+  console.log("Webhook SenePay reçu :", { hasSignature: !!signature, bodyLength: rawBody.length });
+
   const expected = crypto
     .createHmac("sha256", process.env.SENEPAY_WEBHOOK_SECRET!)
     .update(rawBody)
     .digest("hex");
 
   if (!signature || signature !== expected) {
-    console.error("Webhook SenePay : signature invalide.");
+    console.error("Webhook SenePay : signature invalide.", { received: signature, expected });
     return NextResponse.json({ error: "Signature invalide." }, { status: 401 });
   }
 

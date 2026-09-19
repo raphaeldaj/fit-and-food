@@ -46,6 +46,12 @@ export interface CheckoutSessionResult {
   createdAt: string;
 }
 
+export interface CheckoutStatusResult {
+  sessionToken: string;
+  status: "Open" | "Processing" | "Complete" | "Failed" | "Cancelled" | "Expired";
+  orderReference: string;
+}
+
 export async function initiatePayment(params: {
   amount: number;
   operator: "wave" | "orange";
@@ -148,4 +154,16 @@ export async function createCheckoutSession(params: {
   }
 
   return data as CheckoutSessionResult;
+}
+
+export async function getCheckoutSessionStatus(sessionToken: string): Promise<CheckoutStatusResult> {
+  const res = await fetch(`${BASE_URL}/api/v1/checkout/sessions/${sessionToken}`, {
+    method: "GET",
+    headers: headers(),
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(`[SenePay ${data?.code ?? res.status}] ${data?.message ?? "Statut indisponible."}`);
+  }
+  return data as CheckoutStatusResult;
 }
