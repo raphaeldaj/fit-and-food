@@ -111,13 +111,38 @@ export default function PaymentFlow({
       )}
 
       {phase === "idle" && (
-        <button
-          onClick={() => callInitiate()}
-          className="w-full bg-primary hover:bg-primary-hover text-white font-semibold py-2.5 rounded-md"
-        >
-          Payer avec {label}
-        </button>
+        <div className="space-y-2">
+          <button
+            onClick={() => callInitiate()}
+            className="w-full bg-primary hover:bg-primary-hover text-white font-semibold py-2.5 rounded-md"
+          >
+            Payer avec {label}
+          </button>
+          <button
+            onClick={async () => {
+              setError(null);
+              setPhase("initiating");
+              const res = await fetch("/api/payments/checkout", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ orderId }),
+              });
+              const json = await res.json();
+              if (!res.ok) {
+                setError(json.error ?? "Erreur lors de la création de la session.");
+                setPhase("failed");
+                return;
+              }
+              window.location.href = json.checkoutUrl;
+            }}
+            className="w-full border border-border text-text-dark font-semibold py-2.5 rounded-md"
+          >
+            Payer via la page sécurisée SenePay
+          </button>
+        </div>
       )}
+
+      
 
       {phase === "initiating" && <p className="text-sm text-text-muted">Initialisation du paiement...</p>}
 
