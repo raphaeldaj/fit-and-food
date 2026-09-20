@@ -30,7 +30,11 @@ export default function MealForm({ initial, onSaved, onCancel }: Props) {
   const [calories, setCalories] = useState(initial ? String(initial.calories) : "");
   const [proteins, setProteins] = useState(initial ? String(initial.proteins) : "");
   const [goal, setGoal] = useState(initial?.goal ?? "");
-  const [photoUrl, setPhotoUrl] = useState(initial?.photoUrl ?? "");
+  const [photoMode, setPhotoMode] = useState<"url" | "upload">(
+    (initial?.photoUrl ?? "").startsWith("data:") ? "upload" : "url"
+  );
+  const [photoUrl, setPhotoUrl] = useState<string>(initial?.photoUrl ?? "");
+  const [uploading, setUploading] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>(initial?.categories ?? []);
   const [selectedAllergens, setSelectedAllergens] = useState<string[]>(initial?.allergenTags ?? []);
   const [error, setError] = useState<string | null>(null);
@@ -42,6 +46,27 @@ export default function MealForm({ initial, onSaved, onCancel }: Props) {
 
   const toggleValue = (value: string, list: string[], setList: (v: string[]) => void) => {
     setList(list.includes(value) ? list.filter((v) => v !== value) : [...list, value]);
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setError(null);
+    setUploading(true);
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await fetch("/api/admin/catalog/upload-photo", { method: "POST", body: formData });
+    const json = await res.json();
+    setUploading(false);
+
+    if (!res.ok) {
+      setError(json.error ?? "Erreur lors de l'upload.");
+      return;
+    }
+    setPhotoUrl(json.photoUrl);
   };
 
   const submit = async () => {
@@ -108,10 +133,57 @@ export default function MealForm({ initial, onSaved, onCancel }: Props) {
             <option value="PERTE_DE_POIDS">Perte de poids</option>
           </select>
         </div>
-        <div>
-          <label className="block text-xs font-semibold mb-1">Photo (URL, optionnel)</label>
-          <input value={photoUrl} onChange={(e) => setPhotoUrl(e.target.value)} placeholder="https://..." className="w-full border border-border rounded-md p-2 text-sm" />
+      </div>
+
+      <div className="mb-3">
+        <label className="block text-xs font-semibold mb-1.5">Photo du plat</label>
+        <div className="flex gap-2 mb-2">
+          <button
+            type="button"
+            onClick={() => setPhotoMode("url")}
+            className={`text-xs px-3 py-1 rounded-full border ${photoMode === "url" ? "bg-secondary text-white border-secondary" : "bg-white border-border text-text-dark"}`}
+          >
+            Lien URL
+          </button>
+          <button
+            type="button"
+            onClick={() => setPhotoMode("upload")}
+            className={`text-xs px-3 py-1 rounded-full border ${photoMode === "upload" ? "bg-secondary text-white border-secondary" : "bg-white border-border text-text-dark"}`}
+          >
+            Uploader une image
+          </button>
         </div>
+
+        {photoMode === "url" ? (
+          <input
+            value={(photoUrl ?? "").startsWith("data:") ? "" : (photoUrl ?? "")}
+            onChange={(e) => setPhotoUrl(e.target.value)}
+            placeholder="https://..."
+            className="w-full border border-border rounded-md p-2 text-sm"
+          />
+        ) : (
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            onChange={handleFileChange}
+            className="w-full border border-border rounded-md p-2 text-sm bg-white"
+          />
+        )}
+
+        {uploading && <p className="text-xs text-text-muted mt-1.5">Envoi en cours...</p>}
+
+        {photoUrl && !uploading && (
+          <div className="mt-2 flex items-center gap-2">
+            <img src={photoUrl} alt="Aperçu" className="h-16 w-16 object-cover rounded-md border border-border" />
+            <button
+              type="button"
+              onClick={() => setPhotoUrl("")}
+              className="text-xs text-danger underline"
+            >
+              Retirer la photo
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="mb-3">
@@ -147,7 +219,7 @@ export default function MealForm({ initial, onSaved, onCancel }: Props) {
       </div>
 
       <div className="flex gap-2">
-        <button onClick={submit} disabled={loading} className="bg-primary text-white text-xs font-semibold px-4 py-2 rounded-md disabled:opacity-50">
+        <button onClick={submit} disabled={loading || uploading} className="bg-primary text-white text-xs font-semibold px-4 py-2 rounded-md disabled:opacity-50">
           {loading ? "Enregistrement..." : isEdit ? "Enregistrer" : "Ajouter le plat"}
         </button>
         <button onClick={onCancel} className="border border-border text-text-dark text-xs font-semibold px-4 py-2 rounded-md">
