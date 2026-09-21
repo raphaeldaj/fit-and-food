@@ -9,10 +9,10 @@ export default function Footer() {
         <div>
           <h4 className="text-white font-heading text-xs uppercase tracking-wide mb-3">Fit &amp; Food</h4>
           <ul className="space-y-2 text-xs">
-            <li><Link href="/" className="hover:text-white">S&apos;abonner</Link></li>
-            <li><Link href="/connexion" className="hover:text-white">Connexion</Link></li>
-            <li><Link href="/inscription" className="hover:text-white">Inscription</Link></li>
-            <li><Link href="/mon-espace" className="hover:text-white">Mon espace client</Link></li>
+            <li><Link href="/" className="hover:text-primary transition-colors">S&apos;abonner</Link></li>
+            <li><Link href="/connexion" className="hover:text-primary transition-colors">Connexion</Link></li>
+            <li><Link href="/inscription" className="hover:text-primary transition-colors">Inscription</Link></li>
+            <li><Link href="/mon-espace" className="hover:text-primary transition-colors">Mon espace client</Link></li>
           </ul>
         </div>
 
@@ -36,7 +36,7 @@ export default function Footer() {
               Sangalkam, Kounoune, Dakar
             </li>
             <li>
-              <a href="mailto:contact@fit-and-food.onrender.com" className="hover:text-white">
+              <a href="mailto:contact@fit-and-food.onrender.com" className="hover:text-primary transition-colors">
                 contact@fit-and-food.onrender.com
               </a>
             </li>
@@ -51,10 +51,10 @@ export default function Footer() {
         <div>
           <h4 className="text-white font-heading text-xs uppercase tracking-wide mb-3">Informations Légales</h4>
           <ul className="space-y-2 text-xs">
-            <li><Link href="/mentions-legales" className="hover:text-white">Mentions légales</Link></li>
-            <li><Link href="/cgv" className="hover:text-white">Conditions Générales de Vente</Link></li>
-            <li><Link href="/cgu" className="hover:text-white">Conditions Générales d&apos;Utilisation</Link></li>
-            <li><Link href="/confidentialite" className="hover:text-white">Confidentialité &amp; Cookies</Link></li>
+            <li><Link href="/mentions-legales" className="hover:text-primary transition-colors">Mentions légales</Link></li>
+            <li><Link href="/cgv" className="hover:text-primary transition-colors">Conditions Générales de Vente</Link></li>
+            <li><Link href="/cgu" className="hover:text-primary transition-colors">Conditions Générales d&apos;Utilisation</Link></li>
+            <li><Link href="/confidentialite" className="hover:text-primary transition-colors">Confidentialité &amp; Cookies</Link></li>
           </ul>
         </div>
       </div>
