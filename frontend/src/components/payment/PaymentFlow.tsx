@@ -65,7 +65,6 @@ export default function PaymentFlow({
     }
   }, [orderId]);
 
-  // Polling du statut pendant l'attente USSD
   useEffect(() => {
     if (phase !== "waiting" || !token) return;
 
