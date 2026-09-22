@@ -5,7 +5,6 @@ export default function Footer() {
   return (
     <footer className="bg-secondary text-white/70 text-sm pt-10 pb-6 mt-10">
       <div className="max-w-6xl mx-auto px-4 grid sm:grid-cols-2 md:grid-cols-4 gap-8 mb-8">
-        {/* Colonne 1 — À propos */}
         <div>
           <h4 className="text-white font-heading text-xs uppercase tracking-wide mb-3">Fit &amp; Food</h4>
           <ul className="space-y-2 text-xs">
@@ -16,7 +15,6 @@ export default function Footer() {
           </ul>
         </div>
 
-        {/* Colonne 2 — Nos packs */}
         <div>
           <h4 className="text-white font-heading text-xs uppercase tracking-wide mb-3">Nos Formules</h4>
           <ul className="space-y-2 text-xs">
@@ -27,7 +25,6 @@ export default function Footer() {
           </ul>
         </div>
 
-        {/* Colonne 3 — Contact */}
         <div>
           <h4 className="text-white font-heading text-xs uppercase tracking-wide mb-3">Contact</h4>
           <ul className="space-y-2.5 text-xs">
@@ -47,7 +44,6 @@ export default function Footer() {
           </ul>
         </div>
 
-        {/* Colonne 4 — Légal */}
         <div>
           <h4 className="text-white font-heading text-xs uppercase tracking-wide mb-3">Informations Légales</h4>
           <ul className="space-y-2 text-xs">
