@@ -21,8 +21,11 @@ export default function GymClientsTab() {
           <div key={group.gymId} className="border border-border rounded-lg p-4 min-w-0">
             <div className="flex justify-between items-center flex-wrap gap-2 mb-3">
               <h5 className="font-heading text-secondary text-sm">{group.gymName}</h5>
-              <span className="text-xs bg-bg-light px-2.5 py-1 rounded-full">
+              {/* <span className="text-xs bg-bg-light px-2.5 py-1 rounded-full">
                 {group.clients.length} client{group.clients.length > 1 ? "s" : ""} · {group.weeklyFee.toLocaleString("fr-FR")} F/sem.
+              </span> */}
+              <span className="text-xs bg-bg-light px-2.5 py-1 rounded-full">
+                {group.clients.length} client{group.clients.length > 1 ? "s" : ""}
               </span>
             </div>
 
