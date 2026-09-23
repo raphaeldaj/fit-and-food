@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-export interface GymFormData { id?: string; name: string; address: string; }
+export interface GymFormData { id?: string; name: string; address: string;weeklyFee?: number; }
 
 export default function GymForm({ initial, onSaved, onCancel }: { initial?: GymFormData; onSaved: () => void; onCancel: () => void }) {
   const isEdit = !!initial?.id;
