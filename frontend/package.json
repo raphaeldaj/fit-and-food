@@ -30,13 +30,13 @@
     "react-hook-form": "^7.87.0",
     "tailwindcss": "^4.3.3",
     "typescript": "^6.0.3",
+    "@types/react-dom": "^19",
     "zod": "^4.5.4"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/pdfkit": "^0.17.6",
-    "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.3.4",
     "tsx": "^4.23.13"
