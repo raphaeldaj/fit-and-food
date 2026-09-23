@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import GymForm from "./GymForm";
 import SearchInput from "./SearchInput";
 
-interface AdminGym { id: string; name: string; address: string; active: boolean; _count: { users: number }; }
+interface AdminGym { id: string; name: string; address: string; active: boolean; weeklyFee: number; _count: { users: number } }
 
 export default function GymsTab() {
   const [gyms, setGyms] = useState<AdminGym[]>([]);
@@ -63,7 +63,7 @@ export default function GymsTab() {
 
       {editingGym && (
         <GymForm
-          initial={{ id: editingGym.id, name: editingGym.name, address: editingGym.address }}
+          initial={{ id: editingGym.id, name: editingGym.name, address: editingGym.address, weeklyFee: editingGym.weeklyFee }}
           onSaved={() => { setEditingId(null); load(); }}
           onCancel={() => setEditingId(null)}
         />
@@ -75,8 +75,8 @@ export default function GymsTab() {
         <table className="w-full text-sm whitespace-nowrap">
           <thead className="sticky top-0 bg-white">
             <tr className="text-left text-text-muted text-xs">
-              <th className="pb-2 pr-4">Nom</th><th className="pb-2 pr-4">Adresse</th><th className="pb-2 pr-4">Clients rattachés</th>
-              <th className="pb-2 pr-4">Statut</th><th className="pb-2 pr-4">Actions</th>
+              <th className="pb-2 pr-4">Nom</th><th className="pb-2 pr-4">Adresse</th><th className="pb-2 pr-4">Tarif hebdo.</th>
+              <th className="pb-2 pr-4">Clients rattachés</th><th className="pb-2 pr-4">Statut</th><th className="pb-2 pr-4">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -84,6 +84,7 @@ export default function GymsTab() {
               <tr key={g.id} className="border-t border-border">
                 <td className="py-2 pr-4">{g.name}</td>
                 <td className="py-2 pr-4">{g.address}</td>
+                <td className="py-2 pr-4">{g.weeklyFee.toLocaleString("fr-FR")} F</td>
                 <td className="py-2 pr-4">{g._count.users}</td>
                 <td className="py-2 pr-4">{g.active ? "Active" : "Inactive"}</td>
                 <td className="py-2 pr-4">
@@ -102,7 +103,7 @@ export default function GymsTab() {
               </tr>
             ))}
             {!filtered.length && (
-              <tr><td colSpan={5} className="text-text-muted py-3">Aucun résultat</td></tr>
+              <tr><td colSpan={6} className="text-text-muted py-3">Aucun résultat</td></tr>
             )}
           </tbody>
         </table>

@@ -7,6 +7,7 @@ import OrdersTab from "./OrdersTab";
 import DeliveriesTab from "./DeliveriesTab";
 import CatalogTab from "./CatalogTab";
 import GymsTab from "./GymsTab";
+import GymClientsTab from "./GymClientsTab";
 import PacksTab from "./PacksTab";
 import ReviewsTab from "./ReviewsTab";
 import LogsTab from "./LogsTab";
@@ -17,6 +18,7 @@ const TABS = [
   { id: "deliveries", label: "Livraisons" },
   { id: "catalog", label: "Catalogue Repas" },
   { id: "gyms", label: "Salles Partenaires" },
+  { id: "gymclients", label: "Clients par Salle" },
   { id: "tarifs", label: "Tarifs & Promotions" },
   { id: "reviews", label: "Avis Clients" },
   { id: "logs", label: "Logs / Webhooks" },
@@ -53,6 +55,7 @@ export default function AdminDashboard() {
         {activeTab === "deliveries" && <DeliveriesTab />}
         {activeTab === "catalog" && <CatalogTab />}
         {activeTab === "gyms" && <GymsTab />}
+        {activeTab === "gymclients" && <GymClientsTab />}
         {activeTab === "tarifs" && <PacksTab />}
         {activeTab === "reviews" && <ReviewsTab />}
         {activeTab === "logs" && <LogsTab />}

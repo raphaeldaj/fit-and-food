@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import type { Pack } from "@/types";
 import type { SelectedMeal } from "./SubscriptionWizard";
 
-interface Gym { id: string; name: string; }
+interface Gym { id: string; name: string; weeklyFee: number; }
 
 interface Props {
   pack: Pack;
@@ -47,70 +47,44 @@ export default function StepPayment({ pack, mixedGoal, selectedMeals, onBack }: 
       ? "Cutoff : vendredi 23h59. Après ce délai, la souscription est reportée au lundi suivant."
       : "Cutoff : mardi 23h59. Après ce délai, la souscription est reportée au jeudi suivant.";
 
+  const selectedGym = gyms.find((g) => g.id === gymId);
+  const gymFee = selectedGym?.weeklyFee ?? 0;
+  const totalPrice = pack.effectivePrice + gymFee;
 
+  const submit = async () => {
+    setError(null);
+    if (!address || !phone) {
+      setError("Merci de renseigner l'adresse et le téléphone.");
+      return;
+    }
+    if (!gymId) {
+      setError("Le choix d'une salle partenaire est obligatoire — chaque formule inclut 3 séances par semaine.");
+      return;
+    }
+    setLoading(true);
+    const res = await fetch("/api/subscriptions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        packId: pack.id,
+        mixedGoal,
+        slot,
+        paymentMethod,
+        address,
+        phone,
+        gymId,
+        items: selectedMeals.map((m) => ({ mealId: m.mealId, quantity: m.quantity })),
+      }),
+    });
+    const json = await res.json();
+    setLoading(false);
 
-
-    const submit = async () => {
-      setError(null);
-      if (!address || !phone) {
-        setError("Merci de renseigner l'adresse et le téléphone.");
-        return;
-      }
-      setLoading(true);
-      const res = await fetch("/api/subscriptions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          packId: pack.id,
-          mixedGoal,
-          slot,
-          paymentMethod,
-          address,
-          phone,
-          gymId: gymId || null,
-          items: selectedMeals.map((m) => ({ mealId: m.mealId, quantity: m.quantity })),
-        }),
-      });
-      const json = await res.json();
-      setLoading(false);
-
-      if (!res.ok) {
-        setError(json.error ?? "Erreur lors de la souscription.");
-        return;
-      }
-      router.push(`/paiement/${json.orderId}`);
-    };
-
-  // const submit = async () => {
-  //   setError(null);
-  //   if (!address || !phone) {
-  //     setError("Merci de renseigner l'adresse et le téléphone.");
-  //     return;
-  //   }
-  //   setLoading(true);
-  //   const res = await fetch("/api/subscriptions", {
-  //     method: "POST",
-  //     headers: { "Content-Type": "application/json" },
-  //     body: JSON.stringify({
-  //       packId: pack.id,
-  //       mixedGoal,
-  //       slot,
-  //       paymentMethod,
-  //       address,
-  //       phone,
-  //       gymId: gymId || null,
-  //       items: selectedMeals.map((m) => ({ mealId: m.mealId, quantity: m.quantity })),
-  //     }),
-  //   });
-  //   const json = await res.json();
-  //   setLoading(false);
-
-  //   if (!res.ok) {
-  //     setError(json.error ?? "Erreur lors de la souscription.");
-  //     return;
-  //   }
-  //   router.push("/mon-espace");
-  // };
+    if (!res.ok) {
+      setError(json.error ?? "Erreur lors de la souscription.");
+      return;
+    }
+    router.push(`/paiement/${json.orderId}`);
+  };
 
   return (
     <div className="bg-white rounded-xl p-6 shadow-sm mb-6">
@@ -128,10 +102,14 @@ export default function StepPayment({ pack, mixedGoal, selectedMeals, onBack }: 
 
       <div className="grid md:grid-cols-2 gap-6">
         <div>
-          <FormField label="Salle de Sport Partenaire">
+          <FormField label="Salle de Sport Partenaire (obligatoire — 3 séances/semaine incluses)">
             <select value={gymId} onChange={(e) => setGymId(e.target.value)} className="w-full border border-border rounded-md p-2.5 text-sm">
-              <option value="">Aucune / à préciser plus tard</option>
-              {gyms.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
+              <option value="">Choisir une salle...</option>
+              {gyms.map((g) => (
+                <option key={g.id} value={g.id}>
+                  {g.name} (+{g.weeklyFee.toLocaleString("fr-FR")} F/semaine)
+                </option>
+              ))}
             </select>
           </FormField>
           <FormField label="Adresse de Livraison à Dakar">
@@ -166,12 +144,20 @@ export default function StepPayment({ pack, mixedGoal, selectedMeals, onBack }: 
             </div>
           </FormField>
 
-          <div className="bg-bg-light rounded-md p-3.5 mt-4">
-            <div className="flex justify-between font-bold flex-wrap gap-1.5">
-              <span>Total Abonnement :</span>
-              <span className="text-primary">{pack.effectivePrice.toLocaleString("fr-FR")} FCFA</span>
+          <div className="bg-bg-light rounded-md p-3.5 mt-4 space-y-1.5">
+            <div className="flex justify-between text-sm">
+              <span>Pack repas :</span>
+              <span>{pack.effectivePrice.toLocaleString("fr-FR")} F</span>
             </div>
-            <small className="text-text-muted">
+            <div className="flex justify-between text-sm">
+              <span>Accès salle (3 séances/sem.) :</span>
+              <span>{selectedGym ? `${gymFee.toLocaleString("fr-FR")} F` : "à sélectionner"}</span>
+            </div>
+            <div className="flex justify-between font-bold flex-wrap gap-1.5 pt-1.5 border-t border-border">
+              <span>Total Abonnement :</span>
+              <span className="text-primary">{totalPrice.toLocaleString("fr-FR")} FCFA</span>
+            </div>
+            <small className="text-text-muted block">
               Livraison incluse • Prélèvement automatique par cycle • Aucune donnée bancaire stockée
             </small>
           </div>

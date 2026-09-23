@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 
-export interface GymFormData { id?: string; name: string; address: string; }
+export interface GymFormData { id?: string; name: string; address: string; weeklyFee: number; }
 
 export default function GymForm({ initial, onSaved, onCancel }: { initial?: GymFormData; onSaved: () => void; onCancel: () => void }) {
   const isEdit = !!initial?.id;
   const [name, setName] = useState(initial?.name ?? "");
   const [address, setAddress] = useState(initial?.address ?? "");
+  const [weeklyFee, setWeeklyFee] = useState(initial ? String(initial.weeklyFee) : "0");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -22,7 +23,7 @@ export default function GymForm({ initial, onSaved, onCancel }: { initial?: GymF
     const res = await fetch(url, {
       method: isEdit ? "PATCH" : "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, address }),
+      body: JSON.stringify({ name, address, weeklyFee: Number(weeklyFee) || 0 }),
     });
     setLoading(false);
     if (!res.ok) {
@@ -38,7 +39,7 @@ export default function GymForm({ initial, onSaved, onCancel }: { initial?: GymF
       <h5 className="font-heading text-secondary text-sm mb-3">{isEdit ? "Modifier la salle" : "Nouvelle salle partenaire"}</h5>
       {error && <p className="bg-danger/10 text-danger text-sm rounded-md p-2 mb-3">{error}</p>}
 
-      <div className="grid sm:grid-cols-2 gap-3 mb-4">
+      <div className="grid sm:grid-cols-3 gap-3 mb-4">
         <div>
           <label className="block text-xs font-semibold mb-1">Nom</label>
           <input value={name} onChange={(e) => setName(e.target.value)} className="w-full border border-border rounded-md p-2 text-sm" />
@@ -46,6 +47,10 @@ export default function GymForm({ initial, onSaved, onCancel }: { initial?: GymF
         <div>
           <label className="block text-xs font-semibold mb-1">Adresse</label>
           <input value={address} onChange={(e) => setAddress(e.target.value)} className="w-full border border-border rounded-md p-2 text-sm" />
+        </div>
+        <div>
+          <label className="block text-xs font-semibold mb-1">Tarif hebdo. (3 séances/sem.)</label>
+          <input type="number" value={weeklyFee} onChange={(e) => setWeeklyFee(e.target.value)} className="w-full border border-border rounded-md p-2 text-sm" />
         </div>
       </div>
 
