@@ -79,6 +79,7 @@ model Gym {
   name          String
   address       String
   active        Boolean        @default(true)
+  weeklyFee     Int            @default(0)
   users         User[]         @relation("UserGym")
   subscriptions Subscription[] @relation("SubscriptionGym")
 }
