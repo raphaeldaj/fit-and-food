@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/session";
 import { db } from "@/lib/db";
-import { getEffectivePrice } from "@/lib/pricing";
+import { getSubscriptionPrice } from "@/lib/pricing";
 import { rateLimit, getClientIp } from "@/lib/rateLimit";
 import { encryptField } from "@/lib/security/crypto";
 import { logActivity } from "@/lib/security/activityLog";
@@ -33,6 +33,14 @@ export async function POST(req: NextRequest) {
   if (!packId || !slot || !paymentMethod || !address || !phone || !items?.length) {
     return NextResponse.json({ error: "Champs manquants." }, { status: 400 });
   }
+  if (!gymId) {
+    return NextResponse.json({ error: "Le choix d'une salle partenaire est obligatoire." }, { status: 400 });
+  }
+
+  const gym = await db.gym.findUnique({ where: { id: gymId } });
+  if (!gym || !gym.active) {
+    return NextResponse.json({ error: "Salle partenaire invalide." }, { status: 400 });
+  }
 
   const subscription = await db.subscription.create({
     data: {
@@ -43,22 +51,24 @@ export async function POST(req: NextRequest) {
       paymentMethod,
       address: encryptField(address),
       phone: encryptField(phone),
-      gymId: gymId || null,
+      gymId,
       nextDueDate: nextDueDate(slot),
       items: { create: items.map((it: { mealId: string; quantity: number }) => ({ mealId: it.mealId, quantity: it.quantity })) },
     },
   });
 
   const pack = await db.pack.findUnique({ where: { id: packId } });
+  const amount = pack ? getSubscriptionPrice(pack, gym) : 0;
+
   const order = await db.order.create({
-    data: { subscriptionId: subscription.id, amount: pack ? getEffectivePrice(pack) : 0, status: "PENDING" },
+    data: { subscriptionId: subscription.id, amount, status: "PENDING" },
   });
 
   await logActivity({
     userId: user.id,
     userName: user.fullName,
     role: user.role,
-    action: `Nouvelle souscription — ${pack?.formule ?? ""} (${pack?.goal ?? ""})`,
+    action: `Nouvelle souscription — ${pack?.formule ?? ""} (${pack?.goal ?? ""}) — salle ${gym.name}`,
   });
 
   return NextResponse.json({ subscriptionId: subscription.id, orderId: order.id }, { status: 201 });

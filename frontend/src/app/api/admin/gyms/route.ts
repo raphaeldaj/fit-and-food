@@ -15,12 +15,12 @@ export async function POST(req: NextRequest) {
   const { user, error } = await requireAdmin();
   if (error) return error;
 
-  const { name, address } = await req.json();
+  const { name, address, weeklyFee } = await req.json();
   if (!name || !address) {
     return NextResponse.json({ error: "Nom et adresse obligatoires." }, { status: 400 });
   }
 
-  const gym = await db.gym.create({ data: { name, address, active: true } });
+  const gym = await db.gym.create({ data: { name, address, active: true, weeklyFee: Number(weeklyFee) || 0 } });
   await logActivity({ userId: user!.id, userName: user!.fullName, role: user!.role, action: `Nouvelle salle partenaire ajoutée : ${gym.name}` });
 
   return NextResponse.json({ gym }, { status: 201 });

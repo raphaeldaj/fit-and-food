@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { getEffectivePrice } from "@/lib/pricing";
+import { getSubscriptionPrice } from "@/lib/pricing";
 import { requireAdmin } from "@/lib/auth/requireAdmin";
 import { logActivity } from "@/lib/security/activityLog";
 
@@ -11,20 +11,19 @@ export async function POST() {
   const now = new Date();
   const dueSubscriptions = await db.subscription.findMany({
     where: { status: "ACTIVE", nextDueDate: { lte: now } },
-    include: { pack: true },
+    include: { pack: true, gym: true },
   });
 
   const created: string[] = [];
 
   for (const sub of dueSubscriptions) {
-    // Évite de recréer une commande si le cycle en cours n'est pas encore réglé
-    const pending = await db.order.findFirst({
-      where: { subscriptionId: sub.id, status: "PENDING" },
-    });
+    const pending = await db.order.findFirst({ where: { subscriptionId: sub.id, status: "PENDING" } });
     if (pending) continue;
 
+    const amount = sub.gym ? getSubscriptionPrice(sub.pack, sub.gym) : getSubscriptionPrice(sub.pack, { weeklyFee: 0 });
+
     const order = await db.order.create({
-      data: { subscriptionId: sub.id, amount: getEffectivePrice(sub.pack), status: "PENDING" },
+      data: { subscriptionId: sub.id, amount, status: "PENDING" },
     });
 
     const nextDate = new Date(sub.nextDueDate);

@@ -9,12 +9,12 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   if (error) return error;
 
   const { id } = await params;
-  const { name, address } = await req.json();
+  const { name, address, weeklyFee } = await req.json();
   if (!name || !address) {
     return NextResponse.json({ error: "Nom et adresse obligatoires." }, { status: 400 });
   }
 
-  const gym = await db.gym.update({ where: { id }, data: { name, address } });
+  const gym = await db.gym.update({ where: { id }, data: { name, address, weeklyFee: Number(weeklyFee) || 0 } });
   await logActivity({ userId: user!.id, userName: user!.fullName, role: user!.role, action: `Salle modifiée : ${gym.name}` });
 
   return NextResponse.json({ gym });

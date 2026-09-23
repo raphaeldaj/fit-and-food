@@ -101,11 +101,24 @@ export default async function MonEspacePage() {
                   <td className="py-2">{o.formule}</td>
                   <td className="py-2">{o.cycleDate.toLocaleDateString("fr-FR")}</td>
                   <td className="py-2">{o.amount.toLocaleString("fr-FR")} F</td>
+                  {/* <td className="py-2">
+                    {o.status === "PENDING" ? (
+                      <Link href={`/paiement/${o.id}`} className="text-primary underline font-semibold">
+                        Payer maintenant
+                      </Link>
+                    ) : (
+                      o.status
+                    )}
+                  </td> */}
                   <td className="py-2">
                     {o.status === "PENDING" ? (
                       <Link href={`/paiement/${o.id}`} className="text-primary underline font-semibold">
                         Payer maintenant
                       </Link>
+                    ) : o.status === "PAID" ? (
+                      <a href={`/api/orders/${o.id}/receipt`} className="text-secondary underline font-semibold">
+                        Télécharger le reçu
+                      </a>
                     ) : (
                       o.status
                     )}
