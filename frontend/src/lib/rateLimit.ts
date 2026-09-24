@@ -5,11 +5,6 @@ interface Bucket {
 
 const buckets = new Map<string, Bucket>();
 
-/**
- * Limite basique par IP + clé de route, en mémoire.
- * Suffisant pour un seul serveur (dev/petit déploiement).
- * Pour du multi-instance en production, remplacer par un store partagé (Redis).
- */
 export function rateLimit(key: string, limit: number, windowMs: number): { allowed: boolean; remaining: number } {
   const now = Date.now();
   const bucket = buckets.get(key);
