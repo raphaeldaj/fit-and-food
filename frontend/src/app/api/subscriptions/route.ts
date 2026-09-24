@@ -58,7 +58,8 @@ export async function POST(req: NextRequest) {
   });
 
   const pack = await db.pack.findUnique({ where: { id: packId } });
-  const amount = pack ? getSubscriptionPrice(pack, gym) : 0;
+  // const amount = pack ? getSubscriptionPrice(pack, gym) : 0;
+  const amount = pack ? getSubscriptionPrice(pack) : 0;
 
   const order = await db.order.create({
     data: { subscriptionId: subscription.id, amount, status: "PENDING" },
