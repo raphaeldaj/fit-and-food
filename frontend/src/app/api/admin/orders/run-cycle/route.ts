@@ -20,7 +20,8 @@ export async function POST() {
     const pending = await db.order.findFirst({ where: { subscriptionId: sub.id, status: "PENDING" } });
     if (pending) continue;
 
-    const amount = sub.gym ? getSubscriptionPrice(sub.pack, sub.gym) : getSubscriptionPrice(sub.pack, { weeklyFee: 0 });
+    // const amount = sub.gym ? getSubscriptionPrice(sub.pack, sub.gym) : getSubscriptionPrice(sub.pack, { weeklyFee: 0 });
+    const amount = getSubscriptionPrice(sub.pack);
 
     const order = await db.order.create({
       data: { subscriptionId: sub.id, amount, status: "PENDING" },
