@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth/requireAdmin";
 
-const MAX_SIZE_BYTES = 1_500_000; // ~1.5 Mo, marge raisonnable pour une base64 en base
+const MAX_SIZE_BYTES = 1_500_000;
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 export async function POST(req: NextRequest) {
