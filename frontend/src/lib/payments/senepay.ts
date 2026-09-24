@@ -108,14 +108,12 @@ export async function getPaymentStatus(token: string): Promise<StatusResult> {
   return data as StatusResult;
 }
 
-/** Normalise un numéro sénégalais au format international attendu par SenePay. */
 export function normalizePhone(raw: string): string {
   const digits = raw.replace(/\D/g, "");
   if (digits.startsWith("221")) return `+${digits}`;
   return `+221${digits}`;
 }
 
-/** Mappe la méthode stockée en base vers le code opérateur SenePay. */
 export function toOperator(method: "WAVE" | "ORANGE_MONEY"): "wave" | "orange" {
   return method === "WAVE" ? "wave" : "orange";
 }
