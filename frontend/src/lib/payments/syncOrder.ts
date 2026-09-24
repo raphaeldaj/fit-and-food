@@ -1,11 +1,6 @@
 import { db } from "@/lib/db";
 import { getCheckoutSessionStatus } from "./senepay";
 
-/**
- * Vérifie activement le statut réel d'une commande auprès de SenePay
- * et met à jour la base si nécessaire — filet de sécurité si le webhook
- * n'est jamais arrivé (mauvaise clé, service endormi, etc.).
- */
 export async function syncOrderPaymentStatus(orderId: string) {
   const order = await db.order.findUnique({
     where: { id: orderId },
@@ -14,7 +9,7 @@ export async function syncOrderPaymentStatus(orderId: string) {
 
   if (!order) return null;
   if (order.status === "PAID" || order.status === "FAILED") return order.status;
-  if (!order.payment?.token) return order.status; // rien à vérifier côté SenePay
+  if (!order.payment?.token) return order.status;
 
   try {
     const result = await getCheckoutSessionStatus(order.payment.token);
@@ -45,7 +40,7 @@ export async function syncOrderPaymentStatus(orderId: string) {
       return "FAILED";
     }
 
-    return order.status; // toujours en attente
+    return order.status;
   } catch (err) {
     console.error("Erreur synchronisation statut SenePay :", err);
     return order.status;
