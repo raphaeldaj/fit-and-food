@@ -4,7 +4,6 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { decryptField } from "@/lib/security/crypto";
 
-/** Formate un montant en FCFA avec un espace normal (évite les glyphes non supportés par pdfkit). */
 function formatFCFA(amount: number): string {
   return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
 }

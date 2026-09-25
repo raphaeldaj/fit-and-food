@@ -1,5 +1,5 @@
 export interface PasswordStrength {
-  score: number; // 0 à 5
+  score: number;
   label: string;
   color: string;
 }
