@@ -4,9 +4,15 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { decryptField } from "@/lib/security/crypto";
 
+/** Formate un montant en FCFA avec un espace normal (évite les glyphes non supportés par pdfkit). */
+function formatFCFA(amount: number): string {
+  return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+}
+
 function generatePdf(data: {
   orderId: string;
   clientName: string;
+  clientPhone: string;
   formule: string;
   goal: string;
   gymName: string;
@@ -17,8 +23,7 @@ function generatePdf(data: {
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({ margin: 50 });
     const chunks: Buffer[] = [];
-    
-    doc.on("data", (chunk: Buffer) => chunks.push(chunk));
+    doc.on("data", (chunk) => chunks.push(chunk));
     doc.on("end", () => resolve(Buffer.concat(chunks)));
     doc.on("error", reject);
 
@@ -34,6 +39,7 @@ function generatePdf(data: {
 
     doc.fontSize(11).fillColor("#111B3A").text("Client", { underline: true });
     doc.fontSize(10).fillColor("#333").text(data.clientName);
+    doc.text(`Téléphone : ${data.clientPhone}`);
     doc.moveDown(1);
 
     doc.fontSize(11).fillColor("#111B3A").text("Détail de l'abonnement", { underline: true });
@@ -43,10 +49,10 @@ function generatePdf(data: {
     doc.text(`Méthode de paiement : ${data.method}`);
     doc.moveDown(1);
 
-    doc.fontSize(13).fillColor("#111B3A").text(`Montant payé : ${data.amount.toLocaleString("fr-FR")} FCFA`, { align: "right" });
+    doc.fontSize(13).fillColor("#111B3A").text(`Montant payé : ${formatFCFA(data.amount)} FCFA`, { align: "right" });
     doc.moveDown(2);
 
-    doc.fontSize(8).fillColor("#999").text("Fit & Food — Entreprise individuelle — Dakar, Sénégal", { align: "center" });
+    doc.fontSize(8).fillColor("#999").text("Fit & Food — Dakar, Sénégal", { align: "center" });
 
     doc.end();
   });
@@ -72,6 +78,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ orderId
   const pdfBuffer = await generatePdf({
     orderId: order.id,
     clientName: user.fullName,
+    clientPhone: decryptField(order.subscription.phone),
     formule: order.subscription.pack.formule,
     goal: order.subscription.pack.goal.replace("_", " "),
     gymName: order.subscription.gym?.name ?? "-",
