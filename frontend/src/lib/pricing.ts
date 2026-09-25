@@ -3,6 +3,7 @@ export function getEffectivePrice(pack: { price: number; promoActive: boolean; p
   return Math.round(pack.price * (1 - pack.promoPercent / 100));
 }
 
+
 export function getSubscriptionPrice(pack: { price: number; promoActive: boolean; promoPercent: number }) {
   return getEffectivePrice(pack);
 }

@@ -21,6 +21,7 @@ export async function POST() {
     if (pending) continue;
 
     // const amount = sub.gym ? getSubscriptionPrice(sub.pack, sub.gym) : getSubscriptionPrice(sub.pack, { weeklyFee: 0 });
+    
     const amount = getSubscriptionPrice(sub.pack);
 
     const order = await db.order.create({
