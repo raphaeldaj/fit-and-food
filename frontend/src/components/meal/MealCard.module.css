@@ -1,0 +1,211 @@
+/* .card {
+  width: 300px;
+  height: 300px;
+  background: #ffffff;
+  border-radius: 32px;
+  padding: 3px;
+  position: relative;
+  box-shadow: 0 30px 40px -20px rgba(17, 27, 58, 0.28);
+  transition: border-radius 1.5s ease-in-out;
+  margin: 0 auto;
+} */
+
+.card {
+  width: min(90vw, 420px);
+  height: min(90vw, 420px);
+  background: #ffffff;
+  border-radius: 32px;
+  padding: 3px;
+  position: relative;
+  box-shadow: 0 30px 40px -20px rgba(17, 27, 58, 0.28);
+  transition: border-radius 1.5s ease-in-out;
+  margin: 0 auto;
+}
+
+@media (min-width: 640px) {
+  .card {
+    width: 380px;
+    height: 380px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .card {
+    width: 440px;
+    height: 440px;
+  }
+}
+
+.card.revealed {
+  border-top-left-radius: 60px;
+}
+
+.profilePic {
+  position: absolute;
+  width: calc(100% - 6px);
+  height: calc(100% - 6px);
+  top: 3px;
+  left: 3px;
+  border-radius: 29px;
+  z-index: 1;
+  border: 0px solid var(--color-primary, #ff6a13);
+  overflow: hidden;
+  background: var(--color-secondary, #111b3a);
+  transition: all 1.5s ease-in-out 0.15s, z-index 0.5s ease-in-out 0.15s;
+}
+
+.card.revealed .profilePic {
+  width: 96px;
+  height: 96px;
+  top: 14px;
+  left: 14px;
+  border-radius: 50%;
+  z-index: 3;
+  border: 6px solid var(--color-primary, #ff6a13);
+  box-shadow: 0 6px 14px rgba(17, 27, 58, 0.35);
+}
+
+.profilePic img {
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+  object-position: center;
+  transition: all 1.5s ease-in-out;
+}
+
+.placeholderIcon {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.bottom {
+  position: absolute;
+  bottom: 3px;
+  left: 3px;
+  right: 3px;
+  background: var(--color-primary, #ff6a13);
+  top: 80%;
+  border-radius: 29px;
+  z-index: 2;
+  box-shadow: inset 0 5px 5px rgba(17, 27, 58, 0.18);
+  overflow: hidden;
+  transition: all 1.5s cubic-bezier(0.645, 0.045, 0.355, 1) 0s;
+}
+
+.card.revealed .bottom {
+  top: 27%;
+  border-radius: 80px 29px 29px 29px;
+  transition: all 1.5s cubic-bezier(0.645, 0.045, 0.355, 1) 0.15s;
+}
+
+.content {
+  position: absolute;
+  top: 1.3rem;
+  left: 1.5rem;
+  right: 1.5rem;
+}
+
+.name {
+  display: block;
+  font-family: var(--font-heading, inherit);
+  font-size: 1.15rem;
+  color: #ffffff;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.aboutMe {
+  display: block;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.85);
+  margin-top: 0.6rem;
+}
+
+.bottomBottom {
+  position: absolute;
+  bottom: 1rem;
+  left: 1.5rem;
+  right: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.statsContainer {
+  display: flex;
+  gap: 1rem;
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #ffffff;
+  filter: drop-shadow(0 3px 4px rgba(17, 27, 58, 0.15));
+}
+
+.statValue {
+  font-size: 0.65rem;
+  font-weight: 700;
+  margin-top: 2px;
+}
+
+.button {
+  background: #ffffff;
+  color: var(--color-primary, #ff6a13);
+  border: none;
+  border-radius: 20px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 0.45rem 0.7rem;
+  box-shadow: 0 5px 5px rgba(17, 27, 58, 0.15);
+  text-decoration: none;
+  transition: background 0.25s ease, color 0.25s ease;
+}
+
+.button:hover {
+  background: var(--color-secondary, #111b3a);
+  color: #ffffff;
+}
+
+@media (min-width: 640px) {
+  .card.revealed .profilePic {
+    width: 120px;
+    height: 120px;
+    top: 18px;
+    left: 18px;
+  }
+
+  .name {
+    font-size: 1.4rem;
+  }
+
+  .aboutMe {
+    font-size: 0.9rem;
+  }
+
+  .content {
+    top: 1.6rem;
+    left: 1.8rem;
+    right: 1.8rem;
+  }
+
+  .bottomBottom {
+    left: 1.8rem;
+    right: 1.8rem;
+    bottom: 1.3rem;
+  }
+
+  .statValue {
+    font-size: 0.75rem;
+  }
+
+  .button {
+    font-size: 0.72rem;
+    padding: 0.55rem 0.85rem;
+  }
+}

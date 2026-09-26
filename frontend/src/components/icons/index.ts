@@ -19,4 +19,6 @@ export {
   Minus as IconMinus,
   Download as IconDownload,
   PlayCircle as IconPlay,
+  Flame as IconCalories,
+  Dumbbell as IconProteins,
 } from "lucide-react";
