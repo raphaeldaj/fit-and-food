@@ -19,6 +19,7 @@ export default function CatalogTab() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  // console.log(meals);
 
   const load = () => {
     fetch("/api/admin/catalog").then((res) => res.json()).then((data) => setMeals(data.meals ?? []));
@@ -115,6 +116,9 @@ export default function CatalogTab() {
                     <button onClick={() => toggleStock(m.id)} className="text-xs font-semibold px-3 py-1.5 rounded-md bg-secondary text-white">
                       Basculer
                     </button>
+                    <a href={`/api/admin/catalog/${m.id}/qrcard`} className="text-xs font-semibold px-3 py-1.5 rounded-md border border-primary text-primary inline-block">
+                      QR Code
+                    </a>
                     <button onClick={() => remove(m.id, m.name)} className="text-xs font-semibold px-3 py-1.5 rounded-md border border-danger text-danger">
                       Supprimer
                     </button>
