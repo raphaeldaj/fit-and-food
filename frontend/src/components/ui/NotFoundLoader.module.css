@@ -12,7 +12,7 @@
   --color-one: #ffa25e;
   --color-two: #ff6a13;
   --color-three: rgba(255, 106, 19, 0.45);
-  --color-four: rgba(17, 27, 58, 0.35);
+  --color-four: rgb(253, 253, 255);
   --color-five: rgba(255, 106, 19, 0.25);
   --time-animation: 2s;
   --scale: 2.8;
@@ -38,7 +38,7 @@
   border-bottom: solid 1px var(--color-two);
   background:
     linear-gradient(180deg, var(--color-five), var(--color-four)),
-    #111b3a;
+    #ffffff;
   box-shadow:
     inset 0 10px 10px 0 var(--color-three),
     inset 0 -10px 10px 0 var(--color-four);
