@@ -108,7 +108,7 @@ export default function RegisterForm() {
           {showPassword ? <IconEyeHide size={18} /> : <IconEyeShow size={18} />}
         </button>
         {errors.password && <p className="text-danger text-xs mt-1">{errors.password.message}</p>}
-        <p className="text-xs text-text-muted mt-1">10 caractères min., avec majuscule, chiffre et caractère spécial.</p>
+        <p className="text-xs text-text-muted mt-1">10 caractères minimun, avec majuscule, minuscule , chiffre et caractère spécial.</p>
       </div>
 
       <div className="mb-5">
