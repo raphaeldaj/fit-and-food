@@ -244,7 +244,7 @@ export default function AuthCard({ initialMode = "login" }: { initialMode?: "log
               <div className={styles.signupPrompt}>
                 Déjà un compte ?
                 <button type="button" className={styles.toggleLink} onClick={() => setIsSignup(false)}>
-                  Connexion
+                  Connexion 
                 </button>
               </div>
             </div>
