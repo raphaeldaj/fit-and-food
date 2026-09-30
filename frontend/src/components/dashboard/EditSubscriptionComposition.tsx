@@ -98,7 +98,7 @@ export default function EditSubscriptionComposition({ subscriptionId, mealsQty, 
       {error && <p className="bg-danger/10 text-danger text-sm rounded-md p-3 mb-4">{error}</p>}
       {success && (
         <p className="bg-success/10 text-success text-sm rounded-md p-3 mb-4">
-          Composition mise à jour — elle sera appliquée à la prochaine livraison.
+          Composition mise à jour : elle sera appliquée à la prochaine livraison.
         </p>
       )}
 
