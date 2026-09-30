@@ -51,7 +51,7 @@ export default function ReviewForm() {
       <h5 className="font-heading text-secondary text-sm mb-3">Laisser un avis</h5>
 
       {error && <p className="bg-danger/10 text-danger text-sm rounded-md p-2 mb-3">{error}</p>}
-      {success && <p className="bg-success/10 text-success text-sm rounded-md p-2 mb-3">Avis enregistré, merci !</p>}
+      {success && <p className="bg-success/10 text-success text-sm rounded-md p-2 mb-3">Votre avis a bien été enregistré, merci</p>}
 
       <div className="grid sm:grid-cols-2 gap-3 mb-3">
         <select value={mealId} onChange={(e) => setMealId(e.target.value)} className="border border-border rounded-md p-2 text-sm">
