@@ -44,7 +44,8 @@ export default function TwoFactorForm({ userId }: { userId: string }) {
       </div>
 
       <p className="text-sm text-text-muted mb-4">
-        Entre le code à 6 chiffres généré par ton application d'authentification.
+        Ouvre ton application d'authentification (celle utilisée lors de l'activation de la 2FA) : elle affiche
+        un code à 6 chiffres qui se renouvelle toutes les 30 secondes. Entre ce code ci-dessous.
       </p>
 
       {error && (
