@@ -72,6 +72,7 @@ export default function GymsTab() {
       <SearchInput value={search} onChange={setSearch} placeholder="Rechercher une salle, une adresse..." />
 
       <div className="mt-3 max-h-[420px] overflow-auto scrollbar-hide touch-pan-x">
+
         {/* <table className="w-full text-sm whitespace-nowrap">
           <thead className="sticky top-0 bg-white">
             <tr className="text-left text-text-muted text-xs">
@@ -107,6 +108,7 @@ export default function GymsTab() {
             )}
           </tbody>
         </table> */}
+        
         <table className="w-full text-sm whitespace-nowrap">
           <thead className="sticky top-0 bg-white">
             <tr className="text-left text-text-muted text-xs">
