@@ -70,7 +70,7 @@ export default function TwoFactorSetup({ initiallyEnabled }: { initiallyEnabled:
         <h3 className="font-heading text-secondary">Double authentification</h3>
       </div>
 
-      {error && <p className="bg-danger/10 text-danger text-sm rounded-md p-3 mb-4">{error}</p>}
+      {error && <p className="bg-danger/10 text-danger text-sm rounded-md p-2 mb-3">{error}</p>}
 
       {!qrCode ? (
         <>
@@ -90,9 +90,27 @@ export default function TwoFactorSetup({ initiallyEnabled }: { initiallyEnabled:
           <p className="text-sm text-text-muted mb-3">
             Scanne ce QR code avec ton application d'authentification, puis entre le code généré.
           </p>
+
+          <div className="bg-bg-light rounded-md p-3 mb-4">
+            <p className="text-xs font-semibold text-text-dark mb-1.5">Exemples d'applications compatibles :</p>
+            <ul className="text-xs text-text-muted grid grid-cols-2 gap-x-3 gap-y-1">
+              <li>• Google Authenticator</li>
+              <li>• Microsoft Authenticator</li>
+              <li>• Authy</li>
+              <li>• Duo Mobile</li>
+              <li>• 2FAS Authenticator</li>
+            </ul>
+          </div>
+
           <div className="flex justify-center mb-4">
             <img src={qrCode} alt="QR code 2FA" width={180} height={180} />
           </div>
+
+          <p className="text-xs text-text-muted mb-4">
+            Une fois le QR code scanné, ouvre l'application choisie : elle affiche un code à 6 chiffres qui se
+            renouvelle automatiquement toutes les 30 secondes. Saisis ce code ci-dessous pour confirmer l'activation.
+          </p>
+
           <input
             value={code}
             onChange={(e) => setCode(e.target.value)}
