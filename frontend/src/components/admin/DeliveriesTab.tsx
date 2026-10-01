@@ -2,15 +2,20 @@
 
 import { useEffect, useMemo, useState } from "react";
 import SearchInput from "./SearchInput";
+import AdminLoader from "./AdminLoader";
 
 interface AdminDelivery { id: string; slot: string; date: string; client: string; status: string; }
 
 export default function DeliveriesTab() {
   const [deliveries, setDeliveries] = useState<AdminDelivery[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-    fetch("/api/admin/deliveries").then((res) => res.json()).then((data) => setDeliveries(data.deliveries ?? []));
+    fetch("/api/admin/deliveries")
+      .then((res) => res.json())
+      .then((data) => setDeliveries(data.deliveries ?? []))
+      .finally(() => setLoading(false));
   }, []);
 
   const filtered = useMemo(() => {
@@ -19,6 +24,8 @@ export default function DeliveriesTab() {
       d.client.toLowerCase().includes(q) || d.slot.toLowerCase().includes(q) || d.status.toLowerCase().includes(q)
     );
   }, [deliveries, search]);
+
+  if (loading) return <AdminLoader />;
 
   return (
     <div>
