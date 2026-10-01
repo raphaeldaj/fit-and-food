@@ -1,16 +1,23 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import AdminLoader from "./AdminLoader";
 
 interface Client { id: string; name: string; formule: string; slot: string; }
-interface GymGroup { gymId: string; gymName: string; weeklyFee: number; clients: Client[]; }
+interface GymGroup { gymId: string; gymName: string; clients: Client[]; }
 
 export default function GymClientsTab() {
   const [groups, setGroups] = useState<GymGroup[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/admin/clients-by-gym").then((res) => res.json()).then((data) => setGroups(data.groups ?? []));
+    fetch("/api/admin/clients-by-gym")
+      .then((res) => res.json())
+      .then((data) => setGroups(data.groups ?? []))
+      .finally(() => setLoading(false));
   }, []);
+
+  if (loading) return <AdminLoader />;
 
   return (
     <div>
@@ -21,11 +28,6 @@ export default function GymClientsTab() {
           <div key={group.gymId} className="border border-border rounded-lg p-4 min-w-0">
             <div className="flex justify-between items-center flex-wrap gap-2 mb-3">
               <h5 className="font-heading text-secondary text-sm">{group.gymName}</h5>
-
-              {/* <span className="text-xs bg-bg-light px-2.5 py-1 rounded-full">
-                {group.clients.length} client{group.clients.length > 1 ? "s" : ""} · {group.weeklyFee.toLocaleString("fr-FR")} F/sem.
-              </span> */}
-              
               <span className="text-xs bg-bg-light px-2.5 py-1 rounded-full">
                 {group.clients.length} client{group.clients.length > 1 ? "s" : ""}
               </span>
