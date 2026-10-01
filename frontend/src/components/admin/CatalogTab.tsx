@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import MealForm from "./MealForm";
 import SearchInput from "./SearchInput";
+import AdminLoader from "./AdminLoader";
 
 interface AdminMeal {
   id: string; name: string; type: string; calories: number; proteins: number;
@@ -15,14 +16,18 @@ interface AdminMeal {
 
 export default function CatalogTab() {
   const [meals, setMeals] = useState<AdminMeal[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
-  // console.log(meals);
 
   const load = () => {
-    fetch("/api/admin/catalog").then((res) => res.json()).then((data) => setMeals(data.meals ?? []));
+    setLoading(true);
+    fetch("/api/admin/catalog")
+      .then((res) => res.json())
+      .then((data) => setMeals(data.meals ?? []))
+      .finally(() => setLoading(false));
   };
 
   useEffect(load, []);
@@ -52,6 +57,8 @@ export default function CatalogTab() {
   }, [meals, search]);
 
   const editingMeal = meals.find((m) => m.id === editingId);
+
+  if (loading) return <AdminLoader />;
 
   return (
     <div>
