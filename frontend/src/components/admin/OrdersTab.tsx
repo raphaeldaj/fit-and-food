@@ -3,16 +3,22 @@
 import { useEffect, useMemo, useState } from "react";
 import { IconPlay } from "@/components/icons";
 import SearchInput from "./SearchInput";
+import AdminLoader from "./AdminLoader";
 
 interface AdminOrder { id: string; subscription: string; amount: number; status: string; }
 
 export default function OrdersTab() {
   const [orders, setOrders] = useState<AdminOrder[]>([]);
+  const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState(false);
   const [search, setSearch] = useState("");
 
   const load = () => {
-    fetch("/api/admin/orders").then((res) => res.json()).then((data) => setOrders(data.orders ?? []));
+    setLoading(true);
+    fetch("/api/admin/orders")
+      .then((res) => res.json())
+      .then((data) => setOrders(data.orders ?? []))
+      .finally(() => setLoading(false));
   };
 
   useEffect(load, []);
@@ -28,6 +34,8 @@ export default function OrdersTab() {
     const q = search.toLowerCase();
     return orders.filter((o) => o.subscription.toLowerCase().includes(q) || o.status.toLowerCase().includes(q));
   }, [orders, search]);
+
+  if (loading) return <AdminLoader />;
 
   return (
     <div>
