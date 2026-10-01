@@ -1,0 +1,145 @@
+.container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  filter: drop-shadow(0 0 30px rgba(255, 106, 19, 0.18));
+}
+
+.vial {
+  position: relative;
+  width: 56px;
+  height: 140px;
+  border-radius: 28px;
+  background: linear-gradient(180deg, #0f1430 0%, #090c1c 100%);
+  border: 2px solid rgba(255, 106, 19, 0.2);
+  box-shadow:
+    0 0 16px 0 rgba(255, 106, 19, 0.12),
+    inset 0 0 18px rgba(17, 27, 58, 0.5),
+    inset 0 -10px 22px rgba(255, 106, 19, 0.2);
+  overflow: hidden;
+  animation: vialPulse 4s ease-in-out infinite;
+}
+
+.vial::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 28px;
+  box-shadow:
+    inset -5px -5px 12px rgba(0, 0, 0, 0.7),
+    inset 5px 5px 12px rgba(255, 255, 255, 0.12);
+  pointer-events: none;
+  z-index: 10;
+}
+
+.vial::before {
+  content: "";
+  position: absolute;
+  top: 7px;
+  left: 8px;
+  width: 8px;
+  height: 118px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0) 80%);
+  border-radius: 8px;
+  filter: blur(1px);
+  pointer-events: none;
+  z-index: 10;
+}
+
+.base {
+  width: 70px;
+  height: 14px;
+  background: linear-gradient(90deg, #1a1c23, #2a2d38, #1a1c23);
+  border-radius: 7px;
+  margin-top: -7px;
+  z-index: 20;
+  box-shadow:
+    0 8px 14px rgba(0, 0, 0, 0.7),
+    inset 0 1px 1px rgba(255, 255, 255, 0.1),
+    0 -2px 8px rgba(255, 106, 19, 0.3);
+  border: 1px solid #333;
+}
+
+.chamber {
+  position: absolute;
+  inset: -8px;
+  filter: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"><filter id="g"><feGaussianBlur in="SourceGraphic" stdDeviation="5"/><feColorMatrix values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -9"/></filter></svg>#g');
+  z-index: 1;
+}
+
+.pool,
+.droplet {
+  position: absolute;
+  background: linear-gradient(180deg, #ff6a13 10%, #111b3a 90%);
+  border-radius: 50%;
+}
+
+.bottomPool {
+  width: 70px;
+  height: 42px;
+  bottom: 0;
+  left: 0;
+  border-radius: 40% 60% 50% 50%;
+  animation: poolShift 4s ease-in-out infinite alternate;
+}
+
+.topPool {
+  width: 70px;
+  height: 28px;
+  top: 0;
+  left: 0;
+  border-radius: 50% 50% 60% 40%;
+  opacity: 0.8;
+  animation: poolShift 3s ease-in-out infinite alternate-reverse;
+}
+
+.droplet {
+  bottom: 14px;
+}
+
+.d1 { width: 24px; height: 24px; left: 10px; animation: antigravFlow 4s cubic-bezier(0.4, 0.1, 0.3, 1) infinite; }
+.d2 { width: 31px; height: 31px; left: 24px; animation: antigravFlow 5.5s cubic-bezier(0.5, 0.1, 0.2, 1) infinite 1.2s; }
+.d3 { width: 17px; height: 17px; left: 38px; animation: antigravFlow 3.8s cubic-bezier(0.4, 0.2, 0.4, 1) infinite 0.7s; }
+.d4 { width: 19px; height: 19px; left: 17px; animation: antigravFlow 4.5s cubic-bezier(0.3, 0.1, 0.4, 1) infinite 2.5s; }
+.d5 { width: 14px; height: 14px; left: 31px; animation: antigravFlow 3s cubic-bezier(0.4, 0.1, 0.2, 1) infinite 3s; }
+
+.label {
+  margin-top: 14px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-secondary, #111b3a);
+  opacity: 0.6;
+}
+
+@keyframes antigravFlow {
+  0% { transform: translateY(14px) scale(0.8) rotate(0deg); }
+  50% { transform: translateY(-118px) scale(1.15) rotate(180deg); }
+  100% { transform: translateY(14px) scale(0.8) rotate(360deg); }
+}
+
+@keyframes poolShift {
+  0% { transform: scaleX(1) translateX(-3px); }
+  100% { transform: scaleX(1.1) translateX(3px); }
+}
+
+@keyframes vialPulse {
+  0%, 100% {
+    box-shadow:
+      0 0 16px 0 rgba(255, 106, 19, 0.12),
+      inset 0 0 18px rgba(17, 27, 58, 0.5),
+      inset 0 -10px 22px rgba(255, 106, 19, 0.2);
+  }
+  50% {
+    box-shadow:
+      0 0 26px 4px rgba(255, 106, 19, 0.28),
+      inset 0 0 28px rgba(17, 27, 58, 0.65),
+      inset 0 -14px 32px rgba(255, 106, 19, 0.35);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vial, .bottomPool, .topPool, .d1, .d2, .d3, .d4, .d5 {
+    animation: none;
+  }
+}
