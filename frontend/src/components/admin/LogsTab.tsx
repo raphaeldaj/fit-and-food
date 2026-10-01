@@ -2,29 +2,30 @@
 
 import { useEffect, useMemo, useState } from "react";
 import SearchInput from "./SearchInput";
+import AdminLoader from "./AdminLoader";
 
-interface Log {
-  id: string;
-  userName: string;
-  role: string | null;
-  action: string;
-  createdAt: string;
-}
+interface Log { id: string; userName: string; role: string | null; action: string; createdAt: string; }
 
 const ROLE_LABELS: Record<string, string> = { ADMIN: "Admin", CLIENT: "Client" };
 
 export default function LogsTab() {
   const [logs, setLogs] = useState<Log[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-    fetch("/api/admin/logs").then((res) => res.json()).then((data) => setLogs(data.logs ?? []));
+    fetch("/api/admin/logs")
+      .then((res) => res.json())
+      .then((data) => setLogs(data.logs ?? []))
+      .finally(() => setLoading(false));
   }, []);
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
     return logs.filter((l) => l.userName.toLowerCase().includes(q) || l.action.toLowerCase().includes(q));
   }, [logs, search]);
+
+  if (loading) return <AdminLoader />;
 
   return (
     <div>
