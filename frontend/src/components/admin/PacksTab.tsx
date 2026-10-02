@@ -3,15 +3,21 @@
 import { useEffect, useMemo, useState } from "react";
 import type { Pack } from "@/types";
 import SearchInput from "./SearchInput";
+import AdminLoader from "./AdminLoader";
 
 export default function PacksTab() {
   const [packs, setPacks] = useState<Pack[]>([]);
+  const [loading, setLoading] = useState(true);
   const [editingPrice, setEditingPrice] = useState<Record<string, string>>({});
   const [editingPromo, setEditingPromo] = useState<Record<string, string>>({});
   const [search, setSearch] = useState("");
 
   const load = () => {
-    fetch("/api/packs").then((res) => res.json()).then((data) => setPacks(data.packs ?? []));
+    setLoading(true);
+    fetch("/api/packs")
+      .then((res) => res.json())
+      .then((data) => setPacks(data.packs ?? []))
+      .finally(() => setLoading(false));
   };
 
   useEffect(load, []);
@@ -56,6 +62,8 @@ export default function PacksTab() {
     return packs.filter((p) => p.goal.toLowerCase().includes(q) || p.formule.toLowerCase().includes(q));
   }, [packs, search]);
 
+  if (loading) return <AdminLoader />;
+
   return (
     <div>
       <h4 className="font-heading text-secondary text-sm mb-3">Tarifs &amp; Promotions</h4>
@@ -83,7 +91,7 @@ export default function PacksTab() {
                       onChange={(e) => setEditingPrice((prev) => ({ ...prev, [p.id]: e.target.value }))}
                       className="w-20 border border-border rounded p-1.5 text-sm"
                     />
-                    <button onClick={() => savePrice(p.id)} className="text-xs text-secondary underline"></button>
+                    <button onClick={() => savePrice(p.id)} className="text-xs text-secondary underline">OK</button>
                   </div>
                 </td>
                 <td className="py-2 pr-4">
@@ -96,7 +104,7 @@ export default function PacksTab() {
                       onChange={(e) => setEditingPromo((prev) => ({ ...prev, [p.id]: e.target.value }))}
                       className="w-16 border border-border rounded p-1.5 text-sm"
                     />
-                    <button onClick={() => savePromoPercent(p)} className="text-xs text-secondary underline"></button>
+                    <button onClick={() => savePromoPercent(p)} className="text-xs text-secondary underline">OK</button>
                   </div>
                 </td>
                 <td className="py-2 pr-4 font-semibold">
