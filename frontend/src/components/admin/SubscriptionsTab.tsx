@@ -3,15 +3,20 @@
 import { useEffect, useMemo, useState } from "react";
 import { IconDownload } from "@/components/icons";
 import SearchInput from "./SearchInput";
+import AdminLoader from "./AdminLoader";
 
 interface Sub { id: string; client: string; formule: string; slot: string; gym: string; status: string; }
 
 export default function SubscriptionsTab() {
   const [subs, setSubs] = useState<Sub[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-    fetch("/api/admin/subscriptions").then((res) => res.json()).then((data) => setSubs(data.subscriptions ?? []));
+    fetch("/api/admin/subscriptions")
+      .then((res) => res.json())
+      .then((data) => setSubs(data.subscriptions ?? []))
+      .finally(() => setLoading(false));
   }, []);
 
   const filtered = useMemo(() => {
@@ -23,6 +28,8 @@ export default function SubscriptionsTab() {
       s.gym.toLowerCase().includes(q)
     );
   }, [subs, search]);
+
+  if (loading) return <AdminLoader />;
 
   return (
     <div>
