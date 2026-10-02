@@ -2,32 +2,33 @@
 
 import { useEffect, useMemo, useState } from "react";
 import SearchInput from "./SearchInput";
+import AdminLoader from "./AdminLoader";
 import { IconStar } from "@/components/icons";
 
-interface RankedMeal {
-  id: string;
-  name: string;
-  type: string;
-  reviewCount: number;
-  average: number;
-}
+interface RankedMeal { id: string; name: string; type: string; reviewCount: number; average: number; }
 
 export default function ReviewsTab() {
   const [ranked, setRanked] = useState<RankedMeal[]>([]);
+  const [loading, setLoading] = useState(true);
   const [unreviewedCount, setUnreviewedCount] = useState(0);
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-    fetch("/api/admin/reviews").then((res) => res.json()).then((data) => {
-      setRanked(data.ranked ?? []);
-      setUnreviewedCount(data.unreviewedCount ?? 0);
-    });
+    fetch("/api/admin/reviews")
+      .then((res) => res.json())
+      .then((data) => {
+        setRanked(data.ranked ?? []);
+        setUnreviewedCount(data.unreviewedCount ?? 0);
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
     return ranked.filter((m) => m.name.toLowerCase().includes(q));
   }, [ranked, search]);
+
+  if (loading) return <AdminLoader />;
 
   return (
     <div>
